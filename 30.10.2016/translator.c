@@ -164,11 +164,35 @@ extern "C" void* TranslateWordWithNumber(int address, const char* sign, char* nu
 		case S:
 			*resultWord = "S" + string(number);
 			break;
-		// ... need to add other functions
+		case N:
+			*resultWord = "N" + string(number);
+			break;
+		case R:
+			*resultWord = "R" + string(number);
+			break;
+		case I:
+			*resultWord = "I" + string(number);
+			break;
+		case J;
+			*resultWord = "J" + string(number);
+			break;
+		case K;
+			*resultWord = "K" + string(number);
+			break;
+		case X:
+			*resultWord = "X" + string(number);
+			break;
+		case Y;
+			*resultWord = "Y" + string(number);
+			break;
+		case Z;
+			*resultWord = "Z" + string(number);
+			break;		
 		default:
 			*resultWord = to_string(address) + string(sign) + string(number);
 			break;
 	}
+
 	
 	return (void*)resultWord;
 }
