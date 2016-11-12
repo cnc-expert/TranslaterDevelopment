@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <deque>
+#include <algorithm>
 
 using namespace std;
 
@@ -18,16 +19,35 @@ using namespace std;
 //#123 = 13 (N (12 + 1) )
 //GOTO 1
 //N13
+enum typeOfBlock {TB_EPP, TB_ORDINARY};
+
+
+int CounterOfBlocks = 0; // counter of the temporary blocks' numbers
+int MaximalNumberOfBlock = 0;
 
 class Block {
 	public:
 		string* translatedBlock;
 		int numberOfBlock;
 		int numberOfBlockGoTo;
+		enum typeOfBlock type;
 	
 	Block() {
 		numberOfBlock = -1;
 		numberOfBlockGoTo = -1;
+		type = TB_ORDINARY;
+	}
+};
+
+class EppBlock : public Block{
+	public:
+		char* labelOne;
+		char* labelTwo;
+
+	EppBlock() {
+		numberOfBlock = CounterOfBlocks++;
+		numberOfBlockGoTo = -1;
+		type = TB_EPP;
 	}
 };
 
@@ -37,72 +57,40 @@ deque<Block> programFanuc;
 // map: lable -> temporary block number
 map<char*, int> LabledBlocksTable;
 
-int CounterOfBlocks = 0; // counter of the temporary blocks' numbers
-int MaximalNumberOfBlock = 0;
 
 
 // X Y Z G M T F S N R I J K 
 map <int, string> SingleLetterFunctionTable = {
 	
-	{ X, "X"},
-	{ Y, "Y"},
-	{ Z, "Z"},
-	{ G, "G"},
-	{ M, "M"},
-	{ T, "T"},
-	{ F, "F"},
-	{ S, "S"},
-	{ N, "N"},
-	{ R, "R"},
-	{ I, "I"},
-	{ J, "J"},
+	{ X, "X"},	{ Y, "Y"},	{ Z, "Z"},	{ G, "G"},
+	{ M, "M"},	{ T, "T"},	{ F, "F"},	{ S, "S"},
+	{ N, "N"},	{ R, "R"},	{ I, "I"},	{ J, "J"},
 	{ K, "K"}
 	
 };
 
 map <int, int> GCodeTable = {
 	
-	{ 0, 0 },
-	{ 1, 1 },
-	{ 2, 2 },
-	{ 3, 3 },
-	{ 33, 33 },
-	{ 17, 17 },
-	{ 18, 18 },
-	{ 19, 19 },
-	{ 34, 34 },
-	{ 27, 64 },
-	{ 28, 64 },
-	{ 29, 60 },
-	{ 21, -1 },
-	{ 20, -1 },
-	{ 40, 40 },
-	{ 41, 41 },
-	{ 42, 42 },
+	{ 0, 0 },	{ 1, 1 },	{ 2, 2 },
+	{ 3, 3 },	{ 33, 33 },	{ 17, 17 },
+	{ 18, 18 },	{ 19, 19 },	{ 34, 34 },
+	{ 27, 64 },	{ 28, 64 },	{ 29, 60 },
+	{ 21, -1 },	{ 20, -1 },	{ 40, 40 },
+	{ 41, 41 },	{ 42, 42 },
 	{ 70, -1 }, // to something else ???
 	{ 71, -1 }, // to something else ???
-	{ 80, 80 },
-	{ 81, 81 },
-	{ 82, 82 },
-	{ 84, 84 },
-	{ 85, -1 },
-	{ 86, -1 },
-	{ 89, -1 },
-	{ 90, 90 },
-	{ 91, 91 },
-	{ 79, 53 },
-	{ 4, 4 },
-	{ 9, 9 },
-	{ 72, -1 },
-	{ 73, -1 },
-	{ 74, -1 },
-	{ 93, -1 },
-	{ 94, 94 },
-	{ 95, 95 },
+	{ 80, 80 },	{ 81, 81 },	{ 82, 82 },
+	{ 84, 84 },	{ 85, -1 },	{ 86, -1 },
+	{ 89, -1 },	{ 90, 90 },	{ 91, 91 },
+	{ 79, 53 },	{ 4, 4 },	{ 9, 9 },
+	{ 72, -1 },	{ 73, -1 },	{ 74, -1 },
+	{ 93, -1 },	{ 94, 94 },	{ 95, 95 },
 	{ 35, -1 }
 };
 
 map<char*, int> UsedVariableTable; // table containing the variables in use (type "set")
+
+
 
 // Fanuc Variable Range
 // #100...199
@@ -124,25 +112,73 @@ set<int> CreateEmptyVariablesIndexTable() {
 
 set<int> EmptyVariablesIndexTable = CreateEmptyVariablesIndexTable(); // table containing only empty variables (type "set")
 
+extern "C" void* CreateEPPBlock(char* labelOne,char*  labelTwo){
+	EppBlock blockObject;
+	blockObject.translatedBlock = new string("EppBlock");////delete
+	blockObject.labelOne = labelOne;
+	blockObject.labelTwo = labelTwo;
+
+	deque<Block> *programFanuc = new deque<Block>();
+	
+	programFanuc->push_back(blockObject);
+	
+	//cout << programFanuc->size() << endl;;
+	
+	return programFanuc;
+}
+
 extern "C" void PrintProgramDeque() {
-	cout << programFanuc.size() << endl;
+	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
 	while (!programFanuc.empty()) {
-		cout << programFanuc.front().numberOfBlock << " " << programFanuc.front().translatedBlock << endl;
-		programFanuc.pop_front();
+		cout << programFanuc.back().numberOfBlock << " " << *programFanuc.back().translatedBlock << endl;
+		programFanuc.pop_back();
 	}
 	
 }
 
+extern "C" void ProcessEppBlock(){
+
+	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
+		if((*curBlock).type == TB_EPP) {
+			EppBlock* tmp = (EppBlock*)&*curBlock;
+			int numFirstBlock= LabledBlocksTable[tmp->labelOne];
+			//int numSecondBlock = LabledBlocksTable[(dynamic_cast< EppBlock>*curBlock).labelTwo];
+
+			//Block LabelBlock;
+			int metka = *EmptyVariablesIndexTable.begin();
+			EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
+			int freeCadr = MaximalNumberOfBlock++;
+			*tmp->translatedBlock =  string("#") + to_string(metka)+ "=" +to_string(freeCadr);
+			
+		}
+	}
+	/*for(auto curBlock : programFanuc){
+		if(curBlock.type == TB_EPP) {
+			int numFirstBlock= LabledBlocksTable[((EppBlock)curBlock).labelOne];
+			int numSecondBlock = LabledBlocksTable[(*(EppBlock)curBlock).labelTwo];
+
+			//Block LabelBlock;
+			int metka = *EmptyVariablesIndexTable.begin();
+			EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
+			int freeCadr = MaximalNumberOfBlock++;
+			*curBlock.translatedBlock =  "#" + to_string(metka)+ "=" +to_string(freeCadr);
+
+		}
+	}*/
+}
+
+
+
 extern "C" void CreateProgramDeque(void* dequeObject) {
 	deque<Block>* dequeTmp = (deque<Block>*)dequeObject;
 	
-	cout << dequeTmp->size() << endl;
+	//cout <<"CreateProgramDeque "<< dequeTmp->size() << endl;
 	
 	while (!dequeTmp->empty()) {
 		programFanuc.push_back(dequeTmp->front());
 		dequeTmp->pop_front();
 	}
-	
+	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
 	delete dequeTmp;
 }
 
@@ -200,7 +236,26 @@ extern "C" void* CreateDefinedDequeForBlockString(char* blockStr) {
 	
 	programFanuc->push_back(blockObject);
 	
-	cout << programFanuc->size() << endl;;
+	//cout << programFanuc->size() << endl;;
+	
+	return programFanuc;
+}
+
+extern "C" void* CreateDefinedDequeForComments(char* blockStr) {
+	
+	cout << "CreateDefinedDequeForBlockString in process..." << endl;
+	Block blockObject;
+	blockObject.translatedBlock = new string(blockStr);
+
+	replace(blockObject.translatedBlock->begin(),blockObject.translatedBlock->end(), ')', ' ');
+	replace(blockObject.translatedBlock->begin(),blockObject.translatedBlock->end(), '(', ' ');
+	
+	*blockObject.translatedBlock = "(" + *blockObject.translatedBlock + ")";
+	deque<Block> *programFanuc = new deque<Block>();
+	
+	programFanuc->push_back(blockObject);
+	
+	//cout << programFanuc->size() << endl;;
 	
 	return programFanuc;
 }

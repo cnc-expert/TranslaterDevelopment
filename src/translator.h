@@ -11,6 +11,7 @@ void* AddOPDIVtoBlocks(void* dequeObject);
 void* EnumerateBlocks(void* listObject, char* currentNumberOfBlock);
 void* AddLabelToDequeOfBlock(void* listObject, char* label);
 void* CreateDefinedDequeForBlockString(char* blockStr);
+void* CreateDefinedDequeForComments(char* blockStr);
 void* CreateDequeForBlockString(void* blockStr);
 void* ConcatCppString(void* arg1, void* arg2);
 void PrintCppString(void* str);
@@ -23,6 +24,8 @@ void* PutExpressionInBrackets(void* expression);
 void* ConvertCharToCppString(char* tokenNum);
 void* TranslateFunction(int function, void* expression);
 void* TranslateFunctionWithTwoArguments(int function, void* firstExpression, void* secondExpression);
+void* CreateEPPBlock(char* lableOne,char*  labelTwo);
+void ProcessEppBlock();
 
 #ifdef __cplusplus
 }

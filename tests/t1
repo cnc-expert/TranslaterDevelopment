@@ -1,4 +1,6 @@
 "LABEL" N20 X30 Y40
 "LABL" E23=45*2-SIN(E2)
 G1 G28 X650 Z45
-
+(DIS, "label1 )hello world ")
+(DIS, E23)
+(EPP, METKA, LABL)

@@ -20,7 +20,7 @@
 }
 
 %type<cppString> factor signed_item item expr expr_first_item_with_sign expr_block word iso_block 
-%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block
+%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block prog
 %type<tokenCodeMathFunc> func func2 
 %type<numberOrVariable> var_or_num
 %type<tokenSingleLetterFunc> addr
@@ -41,8 +41,19 @@
 
 
 prog:
-	block EOB prog { CreateProgramDeque($1); }
-|	PROG_EOF	{ PrintProgramDeque(); return 0; }
+	block_list PROG_EOF{ 
+		ProcessEppBlock();
+		PrintProgramDeque(); 
+		return 0; 
+	}
+	//block EOB prog { CreateProgramDeque($1); }
+//| block // PROG_EOF
+/*|	PROG_EOF	{ PrintProgramDeque(); return 0; }*/
+;
+
+block_list:
+	block EOB block_list { CreateProgramDeque($1); }
+|   block{ CreateProgramDeque($1); }
 ;
 
 block:
@@ -156,9 +167,9 @@ tlc_block:
 ;
 
 tlc_body:
-	DIS COMMA MSG {}
-|	DIS COMMA E {}
-|	EPP COMMA LABL COMMA LABL {}
+	DIS COMMA MSG {$$=CreateDefinedDequeForComments($3); }
+|	DIS COMMA E {$$ = CreateDefinedDequeForBlockString("");}
+|	EPP COMMA LABL COMMA LABL { $$=CreateEPPBlock($3,$5);}
 |	URT COMMA var_or_num { }
 |	RPT COMMA var_or_num {}
 |	ERP {  }
