@@ -5,59 +5,33 @@
 #include <set>
 #include <deque>
 #include <algorithm>
+#include "translator.h"
+#include "ThreeWordFunc.c"
 
 using namespace std;
 
-// EPP function:
-//
-//#123 = 1
-//N12
-//...
-//GOTO #123
-//N1
-//...
-//#123 = 13 (N (12 + 1) )
-//GOTO 1
-//N13
-enum typeOfBlock {TB_EPP, TB_ORDINARY};
+Block::Block() {
+	numberOfBlock = -1;
+	numberOfBlockGoTo = -1;
+	type = TB_ORDINARY;
+}
+EppBlock ::EppBlock() {
+		numberOfBlock = CounterOfBlocks++;
+		numberOfBlockGoTo = -1;
+		type = TB_EPP;
+	}
 
 
 int CounterOfBlocks = 0; // counter of the temporary blocks' numbers
 int MaximalNumberOfBlock = 0;
 
-class Block {
-	public:
-		string* translatedBlock;
-		int numberOfBlock;
-		int numberOfBlockGoTo;
-		enum typeOfBlock type;
-	
-	Block() {
-		numberOfBlock = -1;
-		numberOfBlockGoTo = -1;
-		type = TB_ORDINARY;
-	}
-};
-
-class EppBlock : public Block{
-	public:
-		char* labelOne;
-		char* labelTwo;
-
-	EppBlock() {
-		numberOfBlock = CounterOfBlocks++;
-		numberOfBlockGoTo = -1;
-		type = TB_EPP;
-	}
-};
-
-
-deque<Block> programFanuc;
-
 // map: lable -> temporary block number
 map<char*, int> LabledBlocksTable;
 
+map<char*, int> UsedVariableTable; // table containing the variables in use (type "set")
 
+
+deque<Block> programFanuc;
 
 // X Y Z G M T F S N R I J K 
 map <int, string> SingleLetterFunctionTable = {
@@ -88,13 +62,7 @@ map <int, int> GCodeTable = {
 	{ 35, -1 }
 };
 
-map<char*, int> UsedVariableTable; // table containing the variables in use (type "set")
 
-
-
-// Fanuc Variable Range
-// #100...199
-// #500...999
 set<int> CreateEmptyVariablesIndexTable() {
 	
 	set<int> emptyVariablesTableTmp;
@@ -112,20 +80,7 @@ set<int> CreateEmptyVariablesIndexTable() {
 
 set<int> EmptyVariablesIndexTable = CreateEmptyVariablesIndexTable(); // table containing only empty variables (type "set")
 
-extern "C" void* CreateEPPBlock(char* labelOne,char*  labelTwo){
-	EppBlock blockObject;
-	blockObject.translatedBlock = new string("EppBlock");////delete
-	blockObject.labelOne = labelOne;
-	blockObject.labelTwo = labelTwo;
 
-	deque<Block> *programFanuc = new deque<Block>();
-	
-	programFanuc->push_back(blockObject);
-	
-	//cout << programFanuc->size() << endl;;
-	
-	return programFanuc;
-}
 
 extern "C" void PrintProgramDeque() {
 	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
@@ -135,39 +90,6 @@ extern "C" void PrintProgramDeque() {
 	}
 	
 }
-
-extern "C" void ProcessEppBlock(){
-
-	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
-		if((*curBlock).type == TB_EPP) {
-			EppBlock* tmp = (EppBlock*)&*curBlock;
-			int numFirstBlock= LabledBlocksTable[tmp->labelOne];
-			//int numSecondBlock = LabledBlocksTable[(dynamic_cast< EppBlock>*curBlock).labelTwo];
-
-			//Block LabelBlock;
-			int metka = *EmptyVariablesIndexTable.begin();
-			EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
-			int freeCadr = MaximalNumberOfBlock++;
-			*tmp->translatedBlock =  string("#") + to_string(metka)+ "=" +to_string(freeCadr);
-			
-		}
-	}
-	/*for(auto curBlock : programFanuc){
-		if(curBlock.type == TB_EPP) {
-			int numFirstBlock= LabledBlocksTable[((EppBlock)curBlock).labelOne];
-			int numSecondBlock = LabledBlocksTable[(*(EppBlock)curBlock).labelTwo];
-
-			//Block LabelBlock;
-			int metka = *EmptyVariablesIndexTable.begin();
-			EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
-			int freeCadr = MaximalNumberOfBlock++;
-			*curBlock.translatedBlock =  "#" + to_string(metka)+ "=" +to_string(freeCadr);
-
-		}
-	}*/
-}
-
-
 
 extern "C" void CreateProgramDeque(void* dequeObject) {
 	deque<Block>* dequeTmp = (deque<Block>*)dequeObject;
@@ -241,6 +163,8 @@ extern "C" void* CreateDefinedDequeForBlockString(char* blockStr) {
 	return programFanuc;
 }
 
+
+
 extern "C" void* CreateDefinedDequeForComments(char* blockStr) {
 	
 	cout << "CreateDefinedDequeForBlockString in process..." << endl;
@@ -272,19 +196,9 @@ extern "C" void* CreateDequeForBlockString(void* blockStr) {
 	return programFanuc;
 }
 
-extern "C" void PrintCppString(void* str) {
-	
-	cout << "Printing CppString in process. Please, wait..." << endl;
-	
-	string* x = (string*)str;
-	cout << *x << endl;
-}
 
-extern "C" void PrintInt(int x) {
-	
-	cout << "Printing CppString in process. Please, wait..." << endl;
-	cout << x << endl;
-}
+
+
 
 int GetVariableNCIndexForFanuc(char* variableNC) { // get the index of variable in NC code
 	
@@ -316,18 +230,10 @@ extern "C" void* TranslateWordWithNumber(int address, const char* sign, char* nu
 	string expressionBeforeDot;
 	string expressionAfterDot;
 	bool resultOfValidationTFunction;
-	
-	//10
-	//E18
-	// G M T F S N R I J K 
+
 	switch (address) {
-		case G:
-			//*resultWord = to_string(address) + string(sign) + to_string(GCodeTable[atoi(number)]);
-			*resultWord = "G" + string(sign) + to_string(GCodeTable[atoi(number)]);
-			break;
-		case M:
-			*resultWord = "M" + string(sign) + string(number);
-			break;
+		case G:	*resultWord = "G" + string(sign) + to_string(GCodeTable[atoi(number)]);	break;
+		case M:	*resultWord = "M" + string(sign) + string(number);	break;
 		case T:
 			resultOfValidationTFunction = ValidateExpressionAboutDot(string(number));
 			if (resultOfValidationTFunction) {
@@ -340,49 +246,18 @@ extern "C" void* TranslateWordWithNumber(int address, const char* sign, char* nu
 			}
 			// add error for dot absent
 			break;
-		case F:
-			*resultWord = "F" + string(number);
-			break;
-		case S:
-			*resultWord = "S" + string(number);
-			break;
-		case N:
-			*resultWord = "N" + string(number);
-			break;
-		case R:
-			*resultWord = "R" + string(number);
-			break;
-		case I:
-			*resultWord = "I" + string(number);
-			break;
-		case J:
-			*resultWord = "J" + string(number);
-			break;
-		case K:
-			*resultWord = "K" + string(number);
-			break;
-		case X:
-			*resultWord = "X" + string(number);
-			break;
-		case Y:
-			*resultWord = "Y" + string(number);
-			break;
-		case Z:
-			*resultWord = "Z" + string(number);
-			break;	
-		default:
-			*resultWord = to_string(address) + string(sign) + string(number);
-			break;
+		case F:	*resultWord = "F" + string(number);	break;
+		case S:	*resultWord = "S" + string(number);	break;
+		case N:	*resultWord = "N" + string(number);	break;
+		case R:	*resultWord = "R" + string(number);	break;
+		case I:	*resultWord = "I" + string(number);	break;
+		case J:	*resultWord = "J" + string(number);	break;
+		case K:	*resultWord = "K" + string(number);	break;
+		case X:	*resultWord = "X" + string(number);	break;
+		case Y:	*resultWord = "Y" + string(number);	break;
+		case Z:	*resultWord = "Z" + string(number);	break;	
+		default: *resultWord = to_string(address) + string(sign) + string(number);	break;
 	}
-	
-	return (void*)resultWord;
-}
-
-extern "C" void* TranslateWordWithVariable(int address, char* variable) 
-{	
-	string* resultWord = new string("");
-	
-	*resultWord = to_string(address) + "#" + to_string(GetVariableNCIndexForFanuc(variable));
 	
 	return (void*)resultWord;
 }
@@ -396,93 +271,115 @@ extern "C" void* TranslateExpressionBlock(char* variableNC, void* expression) {
 	return (void*)x;
 }
 
-extern "C" void* ExecuteNegativeOperation(void* expression) {
+
+extern "C" void* TranslateWordWithVariable(int address, char* variable) 
+{	
+	string* resultWord = new string("");
 	
-	string* x = (string*)expression;
-	*x = "-" + *x; // x--> -x
+	*resultWord = to_string(address) + "#" + to_string(GetVariableNCIndexForFanuc(variable));
 	
-	return (void*)x;
+	return (void*)resultWord;
 }
 
-extern "C" void* ExecuteArithmeticOperation(void* leftExpression, char sign, void* rightExpression) {
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
+extern "C" void* CreateEPPBlock(char* labelOne,char*  labelTwo){
+	EppBlock blockObject;
+	blockObject.translatedBlock = new string("EppBlock");////delete
+
+	blockObject.labelOne = labelOne;
+	blockObject.labelTwo = labelTwo;
 	
-	string* x = (string*)leftExpression;
-	string* x1 = (string*)rightExpression;
-	*x = *x + sign + *x1; // x --> x sign x (sign: +-*/)
+	deque<Block> *programFanuc = new deque<Block>();
 	
-	return (void*)x;
+	programFanuc->push_back(blockObject);
+
+	return programFanuc;
 }
 
-extern "C" void* PutExpressionInBrackets(void* expression) {
-	
-	string* x = (string*)expression;
-	*x = "[" + *x + "]"; // x --> [x]
-	
-	return (void*)x;
-}
+deque<Block>::iterator FindBlock(char* label){
+	int numBlock= LabledBlocksTable[label];
 
-extern "C" void* ConcatCppString(void* arg1, void* arg2) {
-	
-	// pointers correction
-	
-	*(string*)arg1 = *(string*)arg1 + " " + *(string*)arg2;
-	delete (string*)arg2;
-	return arg1;
-}
-
-extern "C" void* ConvertCharToCppString(char* tokenNum ) {
-	
-	return new string(tokenNum);
-}
-
-extern "C" void* TranslateFunction(int function,void* expression) {
-	
-	string* x = (string*)expression; // pointer to String*
-	
-	switch (function) {
-		case SIN:
-			*x= "SIN[" + *x + "]"; // SIN(x) --> SIN[x]
-			break;
-		case COS:
-			*x= "COS[" + *x + "]"; // COS(x) --> COS[x]
-			break;
-		case TAN:
-			*x= "TAN[" + *x + "]"; // TAN(x) --> TAN[x]
-			break;
-		case ARS:
-			*x= "ATAN[[" + *x + "]/SQRT[1-[" + *x + "]*[" + *x +"]]]"; // ARS(x) --> ATAN[ [x]/SQRT[ 1-[x]*[x] ] ]
-			break;
-		case ARC:
-			*x= "2*ATAN[SQRT[[1-["+ *x + "]]/[1+[" + *x + "]]]]"; // ARC(x) --> 2*ATAN[ SQRT[ [1-[x]] / [1+[x]] ] ]
-			break; 
-		case ART:
-			*x= "ATAN[" + *x + "]"; // ART(x) --> ATAN[x]
-			break;
-		case INT:
-			*x= "FIX[" + *x + "]"; // INT(x) --> FIX[x]
-			break;
-		case ABS:
-			*x= "ABS[" + *x + "]"; // ABS(x) --> ABS[x]
-			break;
+	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
+		
+		if((*curBlock).numberOfBlock == numBlock)
+			return curBlock;
 	}
-	
-	return (void*)x;
-	
+	return programFanuc.end();
 }
 
-extern "C" void* TranslateFunctionWithTwoArguments(int function, void* firstExpression, void* secondExpression) {
+
+extern "C" void ProcessEppBlock(){
+
+	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
+		if((*curBlock).type == TB_EPP) {
+			Block tmpCurBlock = *curBlock;
+			EppBlock* tmp = (EppBlock*)&tmpCurBlock;
+
+printf("!!!!!!!!!!!!!!!%2s", tmp->labelTwo);
+			int metka = *EmptyVariablesIndexTable.begin();
+			EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
+			int fisrtFreeCadr = ++MaximalNumberOfBlock;
+			*tmp->translatedBlock =  string("#") + to_string(metka)+ "=" +to_string(fisrtFreeCadr);
 	
-	string* x1 = (string*)firstExpression; // first expression and then result string
-	string* x2 = (string*)secondExpression;
-	
-	switch (function) {
-		case MOD:
-			// MOD(x) --> x1 - FIX(x1 / x2)*x2 --> x1 - FIX[ [x1]/[x2] ] * [x2]
-			*x1 = *x1 + "-FIX[[" + *x1 + "]/[" + *x2 +"]]*[" + *x2 + "]";
-			break;
+
+			Block GoToBlock;
+			int secondFreeCadr = ++MaximalNumberOfBlock;
+			GoToBlock.translatedBlock = new string(string("GOTO ") + to_string(secondFreeCadr)) ;
+
+			Block NBlock;
+			NBlock.translatedBlock =  new string(string("N") + to_string(fisrtFreeCadr));
+
+			programFanuc.insert(curBlock, NBlock);
+			programFanuc.insert(curBlock, GoToBlock);
+
+
+			auto FisrtBlock = FindBlock(tmp->labelOne);
+
+			Block SecondCadrVariableWithCallbackAddress;
+			SecondCadrVariableWithCallbackAddress.translatedBlock =  new string(string("#") + to_string(metka)+string("=")+ to_string(++MaximalNumberOfBlock));
+			programFanuc.insert(FisrtBlock+1, SecondCadrVariableWithCallbackAddress);
+
+			Block SecondCadrNumber;
+			SecondCadrNumber.translatedBlock =  new string(string("N")+ to_string(secondFreeCadr));
+			programFanuc.insert(FisrtBlock+1, SecondCadrNumber);
+
+
+			auto SecondBlock = FindBlock(tmp->labelTwo);
+
+			Block SecondCadrGoToBlock;
+			SecondCadrGoToBlock.translatedBlock =  new string(string("GOTO #") + to_string(metka));
+			programFanuc.insert(SecondBlock, SecondCadrGoToBlock);
+
+			Block SecondCadrNumber1;
+			SecondCadrNumber1.translatedBlock =   new string(string("N")+ to_string(MaximalNumberOfBlock));
+			programFanuc.insert(SecondBlock, SecondCadrNumber1);
+
+		}
 	}
-	delete x2;
+}
+
+
+
+
+
+
+
+
+
+extern "C" void* CreateURTBlock(char* value){
+	Block blockObject;
 	
-	return x1;
+	/*create*/
+
+	deque<Block> *programFanuc = new deque<Block>();
+	
+	programFanuc->push_back(blockObject);
+	
+	//cout << programFanuc->size() << endl;;
+	
+	return programFanuc;
 }
 

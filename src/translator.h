@@ -1,6 +1,51 @@
 #ifndef TRANSLATOR_H
 #define TRANSLATOR_H
 #ifdef __cplusplus
+
+#include <iostream>
+#include <string>
+#include <map>
+#include <set>
+#include <deque>
+#include <algorithm>
+using namespace std;
+
+enum typeOfBlock {TB_EPP, TB_ORDINARY};
+
+extern int CounterOfBlocks; // counter of the temporary blocks' numbers
+extern int MaximalNumberOfBlock;
+
+// map: lable -> temporary block number
+extern map<char*, int> LabledBlocksTable;
+
+extern map<char*, int> UsedVariableTable; // table containing the variables in use (type "set")
+
+
+class Block {
+	public:
+		string* translatedBlock;
+		int numberOfBlock;
+		int numberOfBlockGoTo;
+		enum typeOfBlock type;
+	
+	Block() ;
+};
+
+class EppBlock : public Block{
+	public:
+		char* labelOne;
+		char* labelTwo;
+
+	EppBlock();
+};
+
+extern deque<Block> programFanuc;
+
+// X Y Z G M T F S N R I J K 
+extern map <int, string> SingleLetterFunctionTable;
+
+extern map <int, int> GCodeTable;
+
 extern "C"{
 #endif
 
@@ -27,7 +72,10 @@ void* TranslateFunctionWithTwoArguments(int function, void* firstExpression, voi
 void* CreateEPPBlock(char* lableOne,char*  labelTwo);
 void ProcessEppBlock();
 
+void* CreateURTBlock(char* value);
 #ifdef __cplusplus
 }
 #endif
+
+
 #endif

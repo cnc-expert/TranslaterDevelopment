@@ -6,6 +6,7 @@
 	#include "lex.yy.h"
 	#include "main.h"
 	#include "translator.h"
+
 }
 
 %union {
@@ -170,7 +171,7 @@ tlc_body:
 	DIS COMMA MSG {$$=CreateDefinedDequeForComments($3); }
 |	DIS COMMA E {$$ = CreateDefinedDequeForBlockString("");}
 |	EPP COMMA LABL COMMA LABL { $$=CreateEPPBlock($3,$5);}
-|	URT COMMA var_or_num { }
+|	URT COMMA var_or_num { $$=CreateURTBlock($3);}
 |	RPT COMMA var_or_num {}
 |	ERP {  }
 |	DLY COMMA var_or_num {}
