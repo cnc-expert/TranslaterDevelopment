@@ -16,7 +16,7 @@ extern int CounterOfBlocks; // counter of the temporary blocks' numbers
 extern int MaximalNumberOfBlock;
 
 // map: lable -> temporary block number
-extern map<char*, int> LabledBlocksTable;
+extern map<string, int> LabledBlocksTable;
 
 extern map<char*, int> UsedVariableTable; // table containing the variables in use (type "set")
 

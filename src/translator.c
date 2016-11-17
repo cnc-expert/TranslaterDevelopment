@@ -26,7 +26,7 @@ int CounterOfBlocks = 0; // counter of the temporary blocks' numbers
 int MaximalNumberOfBlock = 0;
 
 // map: lable -> temporary block number
-map<char*, int> LabledBlocksTable;
+map<string, int> LabledBlocksTable;
 
 map<char*, int> UsedVariableTable; // table containing the variables in use (type "set")
 
@@ -140,7 +140,7 @@ extern "C" void* AddLabelToDequeOfBlock(void* dequeObject, char* label) {
 	deque<Block*>* dequeTmp = (deque<Block*>*)dequeObject;
 	dequeTmp->front()->numberOfBlock = CounterOfBlocks;
 
-	LabledBlocksTable[label] = CounterOfBlocks;
+	LabledBlocksTable[string(label)] = CounterOfBlocks;
 
 	CounterOfBlocks++;
 
@@ -300,8 +300,7 @@ extern "C" void* CreateEPPBlock(char* labelOne,char*  labelTwo){
 }
 
 deque<Block*>::iterator FindBlock(char* label){
-	int numBlock= LabledBlocksTable[label];
-
+	int numBlock = LabledBlocksTable[string(label)];
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
 		if((*curBlock)->numberOfBlock == numBlock)
@@ -318,7 +317,7 @@ extern "C" void ProcessEppBlock(){
 		if((*curBlock)->type == TB_EPP) {
 			Block* tmpCurBlock = *curBlock;
 			EppBlock* tmp = (EppBlock*)tmpCurBlock;
-			
+
 			int metka = *EmptyVariablesIndexTable.begin();
 			EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
 			int fisrtFreeCadr = ++MaximalNumberOfBlock;
@@ -349,13 +348,13 @@ extern "C" void ProcessEppBlock(){
 
 			auto SecondBlock = FindBlock(tmp->labelTwo);
 
-			Block* SecondCadrGoToBlock = new Block();
-			SecondCadrGoToBlock->translatedBlock =  new string(string("GOTO #") + to_string(metka));
-			programFanuc.insert(SecondBlock, SecondCadrGoToBlock);
-
 			Block* SecondCadrNumber1 = new Block();
 			SecondCadrNumber1->translatedBlock =   new string(string("N")+ to_string(MaximalNumberOfBlock));
-			programFanuc.insert(SecondBlock, SecondCadrNumber1);
+			programFanuc.insert(SecondBlock+1, SecondCadrNumber1);
+
+			Block* SecondCadrGoToBlock = new Block();
+			SecondCadrGoToBlock->translatedBlock =  new string(string("GOTO #") + to_string(metka));
+			programFanuc.insert(SecondBlock+1, SecondCadrGoToBlock);
 
 		}
 	}
