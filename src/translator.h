@@ -27,7 +27,7 @@ class Block {
 		int numberOfBlock;
 		int numberOfBlockGoTo;
 		enum typeOfBlock type;
-	
+
 	Block() ;
 };
 
@@ -39,9 +39,9 @@ class EppBlock : public Block{
 	EppBlock();
 };
 
-extern deque<Block> programFanuc;
+extern deque<Block*> programFanuc;
 
-// X Y Z G M T F S N R I J K 
+// X Y Z G M T F S N R I J K
 extern map <int, string> SingleLetterFunctionTable;
 
 extern map <int, int> GCodeTable;
