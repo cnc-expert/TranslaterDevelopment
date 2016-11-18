@@ -28,7 +28,7 @@ int MaximalNumberOfBlock = 0;
 // map: lable -> temporary block number
 map<string, int> LabledBlocksTable;
 
-map<char*, int> UsedVariableTable; // table containing the variables in use (type "set")
+map<string, int> UsedVariableTable; // table containing the variables in use (type "set")
 
 
 deque<Block*> programFanuc;
@@ -85,7 +85,7 @@ set<int> EmptyVariablesIndexTable = CreateEmptyVariablesIndexTable(); // table c
 extern "C" void PrintProgramDeque() {
 	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
 	while (!programFanuc.empty()) {
-		cout << programFanuc.back()->numberOfBlock << " " << *programFanuc.back()->translatedBlock << endl;
+		cout << endl << *programFanuc.back()->translatedBlock ;
 		programFanuc.pop_back();
 	}
 
@@ -148,9 +148,11 @@ extern "C" void* AddLabelToDequeOfBlock(void* dequeObject, char* label) {
 
 }
 
+
+
 extern "C" void* CreateDefinedDequeForBlockString(char* blockStr) {
 
-	cout << "CreateDefinedDequeForBlockString in process..." << endl;
+	//cout << "CreateDefinedDequeForBlockString in process..." << endl;
 	Block* blockObject = new Block();
 	blockObject->translatedBlock = new string(blockStr);
 
@@ -167,14 +169,14 @@ extern "C" void* CreateDefinedDequeForBlockString(char* blockStr) {
 
 extern "C" void* CreateDefinedDequeForComments(char* blockStr) {
 
-	cout << "CreateDefinedDequeForBlockString in process..." << endl;
+	//cout << "CreateDefinedDequeForBlockString in process..." << endl;
 	Block* blockObject = new Block();
 	blockObject->translatedBlock = new string(blockStr);
 
 	replace(blockObject->translatedBlock->begin(),blockObject->translatedBlock->end(), ')', ' ');
 	replace(blockObject->translatedBlock->begin(),blockObject->translatedBlock->end(), '(', ' ');
 
-	*blockObject->translatedBlock = "(" + *blockObject->translatedBlock + ")";
+	*blockObject->translatedBlock = ("(" + *blockObject->translatedBlock + ")");
 	deque<Block*> *programFanuc = new deque<Block*>();
 
 	programFanuc->push_back(blockObject);
@@ -201,15 +203,15 @@ extern "C" void* CreateDequeForBlockString(void* blockStr) {
 
 
 int GetVariableNCIndexForFanuc(char* variableNC) { // get the index of variable in NC code
+	string var = string(variableNC);
+	if ( UsedVariableTable.find(var) == UsedVariableTable.end() ) {
 
-	if ( UsedVariableTable.find(variableNC) == UsedVariableTable.end() ) {
-
-		UsedVariableTable[variableNC] = *EmptyVariablesIndexTable.begin();
+		UsedVariableTable[var] = *EmptyVariablesIndexTable.begin();
 		EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
 
 	}
 
-	return UsedVariableTable[variableNC];
+	return UsedVariableTable[var];
 }
 
 bool ValidateExpressionAboutDot(string expressionStr) { // validation
@@ -309,12 +311,37 @@ deque<Block*>::iterator FindBlock(char* label){
 	return programFanuc.end();
 }
 
+extern "C" void* AddGOTOBlock(char* label)
+{
+	//BNC
+	Block* blockObject = new Block();
 
-extern "C" void ProcessEppBlock(){
+	/*create*/
+	//dont work
+	deque<Block*> *programFanuc = new deque<Block*>();
+	blockObject->translatedBlock = new string("GOTO ");
+	++MaximalNumberOfBlock;
+	int numBlock = LabledBlocksTable[string(label)] + MaximalNumberOfBlock;
+	
+	programFanuc->push_back(blockObject);
+
+	//cout << programFanuc->size() << endl;;
+
+	return programFanuc;
+	
+}
+
+extern "C" int ProcessEppBlock(){
 
 
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
+		/*if (*(*curBlock)->translatedBlock == "EppBlock")
+			cout << "Epp" << (*curBlock)->type << endl;
+		else 
+			cout << *(*curBlock)->translatedBlock << (*curBlock)->type<< endl;*/
 		if((*curBlock)->type == TB_EPP) {
+			
+			(*curBlock)->type = TB_ORDINARY;
 			Block* tmpCurBlock = *curBlock;
 			EppBlock* tmp = (EppBlock*)tmpCurBlock;
 
@@ -346,18 +373,20 @@ extern "C" void ProcessEppBlock(){
 			programFanuc.insert(FisrtBlock+1, SecondCadrNumber);
 
 
-			auto SecondBlock = FindBlock(tmp->labelTwo);
+			auto SecondBlock = FindBlock(tmp->labelTwo) + 1;
 
 			Block* SecondCadrNumber1 = new Block();
 			SecondCadrNumber1->translatedBlock =   new string(string("N")+ to_string(MaximalNumberOfBlock));
-			programFanuc.insert(SecondBlock+1, SecondCadrNumber1);
+			programFanuc.insert(SecondBlock, SecondCadrNumber1);
 
 			Block* SecondCadrGoToBlock = new Block();
 			SecondCadrGoToBlock->translatedBlock =  new string(string("GOTO #") + to_string(metka));
-			programFanuc.insert(SecondBlock+1, SecondCadrGoToBlock);
-
+			programFanuc.insert(SecondBlock, SecondCadrGoToBlock);
+			return 1;
 		}
+		
 	}
+	return 0;
 }
 
 
@@ -372,6 +401,27 @@ extern "C" void* CreateURTBlock(char* value){
 	Block* blockObject = new Block();
 
 	/*create*/
+
+	deque<Block*> *programFanuc = new deque<Block*>();
+
+	programFanuc->push_back(blockObject);
+
+	//cout << programFanuc->size() << endl;;
+
+	return programFanuc;
+}
+
+extern "C" void* CreateDelayDeque(char* blockStr) {
+
+	//cout << "CreateDefinedDequeForBlockString in process..." << endl;
+	Block* blockObject = new Block();
+	blockObject->translatedBlock = new string("G4 X");
+	if (blockStr[0] == 'E')
+	{
+		*blockObject->translatedBlock += string("#") + to_string(GetVariableNCIndexForFanuc(blockStr));
+	}
+	else
+		*blockObject->translatedBlock += blockStr;
 
 	deque<Block*> *programFanuc = new deque<Block*>();
 

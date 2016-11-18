@@ -43,7 +43,7 @@
 
 prog:
 	block_list PROG_EOF{ 
-		ProcessEppBlock();
+		while(ProcessEppBlock());
 		PrintProgramDeque(); 
 		return 0; 
 	}
@@ -174,10 +174,10 @@ tlc_body:
 |	URT COMMA var_or_num { $$=CreateURTBlock($3);}
 |	RPT COMMA var_or_num {}
 |	ERP {  }
-|	DLY COMMA var_or_num {}
+|	DLY COMMA var_or_num {$$ = CreateDelayDeque($3);}
 |	UCG COMMA NUM COMMA word word COMMA word word {}
-|	MIR {}
-|	MIR COMMA {}
+|	MIR {$$ = CreateDefinedDequeForBlockString("G52.2");}
+|	MIR COMMA {$$ = CreateDefinedDequeForBlockString("G52.2");}
 |	MIR COMMA axis {}
 |	MIR COMMA axis COMMA axis {}
 |	BNC COMMA LABL {}

@@ -18,7 +18,7 @@ extern int MaximalNumberOfBlock;
 // map: lable -> temporary block number
 extern map<string, int> LabledBlocksTable;
 
-extern map<char*, int> UsedVariableTable; // table containing the variables in use (type "set")
+extern map<string, int> UsedVariableTable; // table containing the variables in use (type "set")
 
 
 class Block {
@@ -70,8 +70,8 @@ void* ConvertCharToCppString(char* tokenNum);
 void* TranslateFunction(int function, void* expression);
 void* TranslateFunctionWithTwoArguments(int function, void* firstExpression, void* secondExpression);
 void* CreateEPPBlock(char* lableOne,char*  labelTwo);
-void ProcessEppBlock();
-
+int  ProcessEppBlock();
+void* CreateDelayDeque(char* blockStr);
 void* CreateURTBlock(char* value);
 #ifdef __cplusplus
 }

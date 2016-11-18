@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.2"
+#define YYBISON_VERSION "3.0.4"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -154,7 +154,7 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
 #line 12 "src/nc.y" /* yacc.c:355  */
@@ -170,6 +170,8 @@ union YYSTYPE
 
 #line 172 "nc.tab.c" /* yacc.c:355  */
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -183,7 +185,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 187 "nc.tab.c" /* yacc.c:358  */
+#line 189 "nc.tab.c" /* yacc.c:358  */
 /* Unqualified %code blocks.  */
 #line 4 "src/nc.y" /* yacc.c:359  */
 
@@ -193,7 +195,7 @@ int yyparse (void);
 	#include "translator.h"
 
 
-#line 197 "nc.tab.c" /* yacc.c:359  */
+#line 199 "nc.tab.c" /* yacc.c:359  */
 
 #ifdef short
 # undef short
@@ -1386,297 +1388,297 @@ yyreduce:
         case 2:
 #line 45 "src/nc.y" /* yacc.c:1646  */
     { 
-		ProcessEppBlock();
+		while(ProcessEppBlock());
 		PrintProgramDeque(); 
 		return 0; 
 	}
-#line 1394 "nc.tab.c" /* yacc.c:1646  */
+#line 1396 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
 #line 56 "src/nc.y" /* yacc.c:1646  */
     { CreateProgramDeque((yyvsp[-2].list)); }
-#line 1400 "nc.tab.c" /* yacc.c:1646  */
+#line 1402 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
 #line 57 "src/nc.y" /* yacc.c:1646  */
     { CreateProgramDeque((yyvsp[0].list)); }
-#line 1406 "nc.tab.c" /* yacc.c:1646  */
+#line 1408 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
 #line 61 "src/nc.y" /* yacc.c:1646  */
     { (yyval.list) = CreateDefinedDequeForBlockString((yyvsp[0].comment)); }
-#line 1412 "nc.tab.c" /* yacc.c:1646  */
+#line 1414 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
 #line 66 "src/nc.y" /* yacc.c:1646  */
     {(yyval.list) = AddOPDIVtoBlocks((yyvsp[0].list));}
-#line 1418 "nc.tab.c" /* yacc.c:1646  */
+#line 1420 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
 #line 71 "src/nc.y" /* yacc.c:1646  */
     {(yyval.list) = AddLabelToDequeOfBlock((yyvsp[0].list), (yyvsp[-1].comment));}
-#line 1424 "nc.tab.c" /* yacc.c:1646  */
+#line 1426 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
 #line 76 "src/nc.y" /* yacc.c:1646  */
     {(yyval.list) = EnumerateBlocks((yyvsp[0].list), (yyvsp[-1].numberOrVariable));}
-#line 1430 "nc.tab.c" /* yacc.c:1646  */
+#line 1432 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
 #line 81 "src/nc.y" /* yacc.c:1646  */
     { (yyval.list) = CreateDefinedDequeForBlockString(""); }
-#line 1436 "nc.tab.c" /* yacc.c:1646  */
+#line 1438 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
 #line 82 "src/nc.y" /* yacc.c:1646  */
     {(yyval.list) = CreateDequeForBlockString((yyvsp[0].cppString)); /*PrintCppString($1);*/}
-#line 1442 "nc.tab.c" /* yacc.c:1646  */
+#line 1444 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
 #line 83 "src/nc.y" /* yacc.c:1646  */
     {(yyval.list) = CreateDequeForBlockString((yyvsp[0].cppString));}
-#line 1448 "nc.tab.c" /* yacc.c:1646  */
+#line 1450 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
 #line 89 "src/nc.y" /* yacc.c:1646  */
     {(yyval.cppString) = ConcatCppString((yyvsp[-1].cppString), (yyvsp[0].cppString));}
-#line 1454 "nc.tab.c" /* yacc.c:1646  */
+#line 1456 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
 #line 93 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = TranslateWordWithNumber((yyvsp[-1].tokenSingleLetterFunc), "", (yyvsp[0].numberOrVariable)); }
-#line 1460 "nc.tab.c" /* yacc.c:1646  */
+#line 1462 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
 #line 94 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = TranslateWordWithNumber((yyvsp[-2].tokenSingleLetterFunc), "+", (yyvsp[0].numberOrVariable)); }
-#line 1466 "nc.tab.c" /* yacc.c:1646  */
+#line 1468 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
 #line 95 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = TranslateWordWithNumber((yyvsp[-2].tokenSingleLetterFunc), "-", (yyvsp[0].numberOrVariable)); }
-#line 1472 "nc.tab.c" /* yacc.c:1646  */
+#line 1474 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
 #line 96 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = TranslateWordWithVariable((yyvsp[-1].tokenSingleLetterFunc), (yyvsp[0].numberOrVariable)); }
-#line 1478 "nc.tab.c" /* yacc.c:1646  */
+#line 1480 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
 #line 100 "src/nc.y" /* yacc.c:1646  */
     { (yyval.tokenSingleLetterFunc) = (yyvsp[0].tokenAxis); }
-#line 1484 "nc.tab.c" /* yacc.c:1646  */
+#line 1486 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
 #line 110 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = TranslateExpressionBlock((yyvsp[-2].numberOrVariable), (yyvsp[0].cppString)); }
-#line 1490 "nc.tab.c" /* yacc.c:1646  */
+#line 1492 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
 #line 117 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ExecuteArithmeticOperation((yyvsp[-2].cppString), '+', (yyvsp[0].cppString)); }
-#line 1496 "nc.tab.c" /* yacc.c:1646  */
+#line 1498 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
 #line 119 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ExecuteArithmeticOperation((yyvsp[-2].cppString), '-', (yyvsp[0].cppString)); }
-#line 1502 "nc.tab.c" /* yacc.c:1646  */
+#line 1504 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
 #line 125 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ExecuteArithmeticOperation((yyvsp[-2].cppString), '+', (yyvsp[0].cppString)); }
-#line 1508 "nc.tab.c" /* yacc.c:1646  */
+#line 1510 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
 #line 127 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ExecuteArithmeticOperation((yyvsp[-2].cppString), '-', (yyvsp[0].cppString)); }
-#line 1514 "nc.tab.c" /* yacc.c:1646  */
+#line 1516 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
 #line 131 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = (yyvsp[0].cppString); }
-#line 1520 "nc.tab.c" /* yacc.c:1646  */
+#line 1522 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
 #line 132 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ExecuteNegativeOperation((yyvsp[0].cppString)); }
-#line 1526 "nc.tab.c" /* yacc.c:1646  */
+#line 1528 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
 #line 138 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ExecuteArithmeticOperation((yyvsp[-2].cppString), '*', (yyvsp[0].cppString)); }
-#line 1532 "nc.tab.c" /* yacc.c:1646  */
+#line 1534 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
 #line 140 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ExecuteArithmeticOperation((yyvsp[-2].cppString), '/', (yyvsp[0].cppString)); }
-#line 1538 "nc.tab.c" /* yacc.c:1646  */
+#line 1540 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
 #line 145 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ConvertCharToCppString((yyvsp[0].numberOrVariable)); }
-#line 1544 "nc.tab.c" /* yacc.c:1646  */
+#line 1546 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
 #line 147 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = ConvertCharToCppString((yyvsp[0].numberOrVariable)); }
-#line 1550 "nc.tab.c" /* yacc.c:1646  */
+#line 1552 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
 #line 149 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = TranslateFunction((yyvsp[-3].tokenCodeMathFunc), (yyvsp[-1].cppString)); }
-#line 1556 "nc.tab.c" /* yacc.c:1646  */
+#line 1558 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
 #line 151 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = TranslateFunctionWithTwoArguments((yyvsp[-5].tokenCodeMathFunc), (yyvsp[-3].cppString), (yyvsp[-1].cppString)); }
-#line 1562 "nc.tab.c" /* yacc.c:1646  */
+#line 1564 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
 #line 153 "src/nc.y" /* yacc.c:1646  */
     { (yyval.cppString) = PutExpressionInBrackets((yyvsp[-1].cppString)); }
-#line 1568 "nc.tab.c" /* yacc.c:1646  */
+#line 1570 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
 #line 167 "src/nc.y" /* yacc.c:1646  */
     { (yyval.list) = (yyvsp[-1].list); }
-#line 1574 "nc.tab.c" /* yacc.c:1646  */
+#line 1576 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
 #line 171 "src/nc.y" /* yacc.c:1646  */
     {(yyval.list)=CreateDefinedDequeForComments((yyvsp[0].comment)); }
-#line 1580 "nc.tab.c" /* yacc.c:1646  */
+#line 1582 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 62:
 #line 172 "src/nc.y" /* yacc.c:1646  */
     {(yyval.list) = CreateDefinedDequeForBlockString("");}
-#line 1586 "nc.tab.c" /* yacc.c:1646  */
+#line 1588 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 63:
 #line 173 "src/nc.y" /* yacc.c:1646  */
     { (yyval.list)=CreateEPPBlock((yyvsp[-2].comment),(yyvsp[0].comment));}
-#line 1592 "nc.tab.c" /* yacc.c:1646  */
+#line 1594 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
 #line 174 "src/nc.y" /* yacc.c:1646  */
     { (yyval.list)=CreateURTBlock((yyvsp[0].numberOrVariable));}
-#line 1598 "nc.tab.c" /* yacc.c:1646  */
+#line 1600 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 65:
 #line 175 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1604 "nc.tab.c" /* yacc.c:1646  */
+#line 1606 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 66:
 #line 176 "src/nc.y" /* yacc.c:1646  */
     {  }
-#line 1610 "nc.tab.c" /* yacc.c:1646  */
+#line 1612 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 67:
 #line 177 "src/nc.y" /* yacc.c:1646  */
-    {}
-#line 1616 "nc.tab.c" /* yacc.c:1646  */
+    {(yyval.list) = CreateDelayDeque((yyvsp[0].numberOrVariable));}
+#line 1618 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 68:
 #line 178 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1622 "nc.tab.c" /* yacc.c:1646  */
+#line 1624 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 69:
 #line 179 "src/nc.y" /* yacc.c:1646  */
-    {}
-#line 1628 "nc.tab.c" /* yacc.c:1646  */
+    {(yyval.list) = CreateDefinedDequeForBlockString("G52.2");}
+#line 1630 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 70:
 #line 180 "src/nc.y" /* yacc.c:1646  */
-    {}
-#line 1634 "nc.tab.c" /* yacc.c:1646  */
+    {(yyval.list) = CreateDefinedDequeForBlockString("G52.2");}
+#line 1636 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 71:
 #line 181 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1640 "nc.tab.c" /* yacc.c:1646  */
+#line 1642 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 72:
 #line 182 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1646 "nc.tab.c" /* yacc.c:1646  */
+#line 1648 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 73:
 #line 183 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1652 "nc.tab.c" /* yacc.c:1646  */
+#line 1654 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 74:
 #line 184 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1658 "nc.tab.c" /* yacc.c:1646  */
+#line 1660 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 75:
 #line 185 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1664 "nc.tab.c" /* yacc.c:1646  */
+#line 1666 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 76:
 #line 186 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1670 "nc.tab.c" /* yacc.c:1646  */
+#line 1672 "nc.tab.c" /* yacc.c:1646  */
     break;
 
   case 77:
 #line 187 "src/nc.y" /* yacc.c:1646  */
     {}
-#line 1676 "nc.tab.c" /* yacc.c:1646  */
+#line 1678 "nc.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1680 "nc.tab.c" /* yacc.c:1646  */
+#line 1682 "nc.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
