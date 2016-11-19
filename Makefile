@@ -20,6 +20,8 @@ t7: bin/${OUTF}
 	bin/${OUTF} < tests/t7
 t8: bin/${OUTF}
 	bin/${OUTF} < tests/t8
+t8_full: bin/${OUTF}
+	bin/${OUTF} < tests/t8_full
 
 bin/${OUTF}: src/lex.yy.c src/parser.tab.c bin/lexer.o bin/parser.o bin/main.o bin/translator.o
 	g++ -g bin/*.o -o bin/${OUTF} 

@@ -1,12 +1,16 @@
-;Test 8: EPP advanced test
+;Test 8: EPP advanced test.
 
+;----- Here is label 'DRSTR' used as labelOne in different pairs. -----
 N10 (DIS, "SVERLENIE OTVERSTIY")
-
+G0 G29 G40 G90 G79 Z0
+G95
+;(UAO,2)
+;(URT,0)
 ;SVERLO D5
-T1.1 M16
+T2.2 M16
 S1600 M3 
 
-G0 X100 Y100
+X100 Y100
 "DRSTR"
   G0 G90 Z3 M8
   G1 Z-30 F0.1 
@@ -17,20 +21,14 @@ G0 X100 Y100
   (EPP,DRSTR,DREND)
   G91 X15
   (EPP,DRSTR,DREND)
-"DRSHFT"
+"DRSHF"
 
 X-100 Y100
-(EPP,DRSTR,DRSHFT)
+(EPP,DRSTR,DRSHF)
 
 X-100 Y-100
-(EPP,DRSTR,DRSHFT)
-
-X100 Y-100
-(EPP,DRSTR,DRSHFT)
+(EPP,DRSTR,DRSHF)
 
 G79 Z0 M9
 G79 X0 Y0 M5
-M0
-
-N20
 M2

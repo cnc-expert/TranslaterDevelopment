@@ -162,7 +162,7 @@ extern "C" int ProcessEppBlock() {
 		MatchLabelAndNumberOfBlock[curEppBlock->labelTwo] = MaximalNumberOfBlock;
 	}
 	
-	firstEpp = FindFrontEppBlock(); /* Bug was here: modifing the deque object discards all previously stated iterators. */
+	firstEpp = FindFrontEppBlock(); /* Bug was here: modifing the deque object discards all previously stated iterators? */
 	(*firstEpp)->type = TB_ORDINARY;
 	TranslateEppBlock(firstEpp, MatchLabelAndVariable[curEppBlock->labelTwo], MatchLabelAndNumberOfBlock[curEppBlock->labelOne]);
 	
