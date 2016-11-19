@@ -21,7 +21,7 @@
 }
 
 %type<cppString> factor signed_item item expr expr_first_item_with_sign expr_block word iso_block 
-%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block prog
+%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block
 %type<tokenCodeMathFunc> func func2 
 %type<numberOrVariable> var_or_num
 %type<tokenSingleLetterFunc> addr
@@ -31,7 +31,7 @@
 %token EOB PROG_EOF
 %token<comment> LABL COMM MSG
 %token COMMA
-%token BGT BGE BLT BLE BNC DLY URT UCG MIR EPP RPT ERP DIS
+%token BGT BGE BLT BLE BNC DLY URT UCG MIR EPP RPT ERP DIS UAO
 %token<tokenSingleLetterFunc> G M T F S N R I J K
 %token<tokenAxis> X Y Z
 %token OPEQUAL OPDIV OPMULT OPPLUS OPMINUS OPARENT CPARENT
@@ -42,14 +42,11 @@
 
 
 prog:
-	block_list PROG_EOF{ 
+	block_list PROG_EOF { 
 		while(ProcessEppBlock());
 		PrintProgramDeque(); 
 		return 0; 
 	}
-	//block EOB prog { CreateProgramDeque($1); }
-//| block // PROG_EOF
-/*|	PROG_EOF	{ PrintProgramDeque(); return 0; }*/
 ;
 
 block_list:
@@ -58,8 +55,8 @@ block_list:
 ;
 
 block:
-	COMM  { $$ = CreateDefinedDequeForBlockString($1); }
-|	confirm_block /* Old version submit_block */
+	COMM  { $$ = CreateDefinedDequeForComments($1); }
+|	confirm_block
 ;
 
 confirm_block:
@@ -171,6 +168,7 @@ tlc_body:
 	DIS COMMA MSG {$$=CreateDefinedDequeForComments($3); }
 |	DIS COMMA E {$$ = CreateDefinedDequeForBlockString("");}
 |	EPP COMMA LABL COMMA LABL { $$=CreateEPPBlock($3,$5);}
+|	UAO COMMA var_or_num { $$ = CreateDefinedDequeForBlockString("G54"); } /* TO-DO */
 |	URT COMMA var_or_num { $$=CreateURTBlock($3);}
 |	RPT COMMA var_or_num {}
 |	ERP {  }
@@ -191,41 +189,4 @@ var_or_num:
 	E
 |	NUM
 ;
-
-/*
-
-"ASDF"
-
-(RPT,5)
-   (RPT,E2)
-   	  ...
-   (ERP)
-
-
-   (EPP, ASDF, QWER)
-
-(ERP)
-
-
-#100=0
-N12 IF [#100 GE 5] GOTO 13  (stack of block number pair)
-#100=#100+1
-
-	#101=0
-	N14 IF [#101 GE 5] GOTO 15
-	#101=#101+1
-
-    GOTO 14
-    N15
-
-
-
-	#102=16
-	GOTO 278 (hashtable: label -> block number)
-	N16
-
-
-GOTO 12
-N13
-*/
 

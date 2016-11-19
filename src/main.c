@@ -1,5 +1,4 @@
 //#include "main.h"
-//#include "nc.tab.h"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -7,32 +6,33 @@
 
 using namespace std;
 
-set<string> SymbolTable; // the table of symbols
-int SymbolCount = 0;
+
+int linenum = 0;
+
 
 extern "C" void yyerror (const char *s)
 {
 	cerr << s << endl;
+	cerr << "\tError occured at line: " << linenum+1 << endl;
 }
 
-
-// This function adds the element to the table of symbols (type "set")
 
 extern "C" char* AddToSymbolTable(char* yytext) 
 {	
-	SymbolCount++;
-	//cout << "Token #" << SymbolCount << " addition in the table of symbols in process. Please, wait..." << endl;
-	
-	char *symbol_string = (char *) malloc(strlen(yytext));
-	strcpy(symbol_string, yytext);
-	return symbol_string;
-	
-	//string yytextStr(yytext);
-	//SymbolTable.insert(yytextStr);
-	//return ( *SymbolTable.find(yytextStr) ).c_str();
+	static set<string> SymbolTable; // the table of symbols
+	string yytextStr(yytext);
+	SymbolTable.insert(yytextStr);
+
+	// Discard const qualifier (return char* without warnings)
+	const char *symtab_cstring = SymbolTable.find(yytextStr)->c_str();
+	char **symtab_cstr_ptr = (char **) &symtab_cstring;
+
+	return *symtab_cstr_ptr;
 }
 
+
 extern "C" int yyparse();
+
 
 int main(int argc, char *argv[])
 {

@@ -3,8 +3,20 @@ OUTF=nc2fanuc
 all: bin/${OUTF}
 	bin/${OUTF}
 
-test: bin/${OUTF}
+t1: bin/${OUTF}
 	bin/${OUTF} < tests/t1
+t2: bin/${OUTF}
+	bin/${OUTF} < tests/t2
+t3: bin/${OUTF}
+	bin/${OUTF} < tests/t3
+t4: bin/${OUTF}
+	bin/${OUTF} < tests/t4
+t5: bin/${OUTF}
+	bin/${OUTF} < tests/t5
+t6: bin/${OUTF}
+	bin/${OUTF} < tests/t6
+t7: bin/${OUTF}
+	bin/${OUTF} < tests/t7
 
 bin/${OUTF}: src/lex.yy.c src/nc.tab.c bin/lexer.o bin/parser.o bin/main.o bin/translator.o
 	g++ -g bin/*.o -o bin/${OUTF} 

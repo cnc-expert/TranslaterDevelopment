@@ -1,7 +1,8 @@
-(DIS, "lhello world ")
-"LABEL" N20 X30 Y40
-G1 G28 X650 Z45
-(DIS, "label1 )hello world ")
+;Comments testing
+
+(DIS, " some comment ")
+(DIS, "string with (parentheses)")
+
+;This should be ignored
 (DIS, E23)
-"LABL" E23=45*2-SIN(E2)
-(EPP, LABEL, LABL)
+
