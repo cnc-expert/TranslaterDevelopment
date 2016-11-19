@@ -141,7 +141,7 @@ factor:
 	NUM 
 		{ $$ = ConvertCharToCppString($1); }
 |	E 
-		{ $$ = ConvertCharToCppString($1); }
+		{ $$ = SubstituteNCvarAsCppString($1); }
 |	func OPARENT expr_first_item_with_sign CPARENT 
 		{ $$ = TranslateFunction($1, $3); }
 |	func2 OPARENT expr_first_item_with_sign COMMA expr_first_item_with_sign CPARENT

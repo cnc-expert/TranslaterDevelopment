@@ -45,6 +45,8 @@ extern map <int, string> SingleLetterFunctionTable;
 
 extern map <int, int> GCodeTable;
 
+int GetVariableNCIndexForFanuc(char* variableNC);
+
 extern "C"{
 #endif
 
@@ -66,6 +68,7 @@ void* ExecuteNegativeOperation(void* expression);
 void* ExecuteArithmeticOperation(void* leftExpression, char sign, void* rightExpression);
 void* PutExpressionInBrackets(void* expression);
 void* ConvertCharToCppString(char* tokenNum);
+void* SubstituteNCvarAsCppString(char *tokenVar);
 void* TranslateFunction(int function, void* expression);
 void* TranslateFunctionWithTwoArguments(int function, void* firstExpression, void* secondExpression);
 void* CreateEPPBlock(char* lableOne,char*  labelTwo);

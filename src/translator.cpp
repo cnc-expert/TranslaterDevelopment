@@ -296,13 +296,9 @@ extern "C" void* TranslateExpressionBlock(char* variableNC, void* expression) {
 
 extern "C" void* TranslateWordWithVariable(int address, char* variable)
 {
-	string* resultWord = new string("");
-	
-	//*resultWord = to_string(address) + "#" + to_string(GetVariableNCIndexForFanuc(variable));
-	
-	return  TranslateWordWithNumber(address,"", ("#" + to_string(GetVariableNCIndexForFanuc(variable))).c_str() );
-	
-	
+	string *varString = (string *) SubstituteNCvarAsCppString(variable);
+
+	return TranslateWordWithNumber(address, "", varString->c_str());
 }
 
 

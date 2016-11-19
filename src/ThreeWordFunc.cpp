@@ -95,9 +95,16 @@ extern "C" void* ConcatCppString(void* arg1, void* arg2) {
 	return arg1;
 }
 
-extern "C" void* ConvertCharToCppString(char* tokenNum ) {
+extern "C" void* ConvertCharToCppString(char* tokenNum) {
 	
 	return new string(tokenNum);
+}
+
+extern "C" void* SubstituteNCvarAsCppString(char* tokenVar) {
+	string *fanucVarString = new string("#");
+	*fanucVarString += to_string(GetVariableNCIndexForFanuc(tokenVar));
+
+	return fanucVarString;
 }
 
 extern "C" void PrintCppString(void* str) {
