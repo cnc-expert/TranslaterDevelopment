@@ -1,4 +1,3 @@
-#include "nc.tab.h"
 #include <iostream>
 #include <string>
 #include <map>
@@ -6,20 +5,26 @@
 #include <deque>
 #include <algorithm>
 #include "translator.h"
-#include "ThreeWordFunc.c"
+#include "parser.tab.h"
+#include "ThreeWordFunc.cpp"
 
 using namespace std;
+
+
 
 Block::Block() {
 	numberOfBlock = -1;
 	numberOfBlockGoTo = -1;
 	type = TB_ORDINARY;
-}
+}	
+
 EppBlock ::EppBlock() {
-		numberOfBlock = CounterOfBlocks++;
-		numberOfBlockGoTo = -1;
-		type = TB_EPP;
-	}
+	numberOfBlock = CounterOfBlocks++;
+	numberOfBlockGoTo = -1;
+	type = TB_EPP;
+	labelOne = NULL;
+	labelTwo = NULL;
+}
 
 	
 

@@ -1,5 +1,5 @@
 %{
-#include "nc.tab.h"
+#include "parser.tab.h"
 #include "main.h"
 %}
 

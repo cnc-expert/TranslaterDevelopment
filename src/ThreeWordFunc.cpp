@@ -1,4 +1,4 @@
-#include "nc.tab.h"
+#include "parser.tab.h"
 
 #include <iostream>
 #include <string>

@@ -8,6 +8,7 @@
 #include <set>
 #include <deque>
 #include <algorithm>
+
 using namespace std;
 
 enum typeOfBlock {TB_EPP, TB_ORDINARY};
