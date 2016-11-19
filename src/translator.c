@@ -247,8 +247,8 @@ extern "C" void* TranslateWordWithNumber(int address, const char* sign, const ch
 	bool resultOfValidationTFunction;
 
 	switch (address) {
-		case G:	*resultWord = "G" + string(sign) + to_string(GCodeTable[atoi(number)]);	break;
-		case M:	*resultWord = "M" + string(sign) + string(number);	break;
+		case G:	*resultWord = "G" + to_string(GCodeTable[atoi(number)]);	break;
+		case M:	*resultWord = "M" + string(number);	break;
 		case T:
 			resultOfValidationTFunction = ValidateExpressionAboutDot(string(number));
 			if (resultOfValidationTFunction) {
@@ -264,13 +264,13 @@ extern "C" void* TranslateWordWithNumber(int address, const char* sign, const ch
 		case F:	*resultWord = "F" + string(number);	break;
 		case S:	*resultWord = "S" + string(number);	break;
 		case N:	*resultWord = "N" + string(number);	break;
-		case R:	*resultWord = "R" + string(number);	break;
-		case I:	*resultWord = "I" + string(number);	break;
-		case J:	*resultWord = "J" + string(number);	break;
+		case R:	*resultWord = "R" + string(sign) + string(number);	break;
+		case I:	*resultWord = "I" + string(sign) + string(number);	break;
+		case J:	*resultWord = "J" + string(sign) + string(number);	break;
 		case K:	*resultWord = "K" + string(number);	break;
-		case X:	*resultWord = "X" + string(number);	break;
-		case Y:	*resultWord = "Y" + string(number);	break;
-		case Z:	*resultWord = "Z" + string(number);	break;
+		case X:	*resultWord = "X" + string(sign) + string(number);	break;
+		case Y:	*resultWord = "Y" + string(sign) + string(number);	break;
+		case Z:	*resultWord = "Z" + string(sign) + string(number);	break;
 		default: *resultWord = to_string(address) + string(sign) + string(number);	break;
 	}
 
@@ -348,21 +348,13 @@ extern "C" void* AddGOTOBlock(char* label)
 	
 }
 
-extern "C" void ChangeBlockNumber() {
-	
-	/*for (auto curBlock = programFanuc.end(); curBlock!= programFanuc.begin(); curBlock-- ) {
-		if ( curBlock.numberOfBlock != -1 ) 
-			(*curBlock).numberOfBlock += MaximalNumberOfBlock;
-		
-	}*/
-}
+
 
 void TranslateEppBlock(deque<Block*>::iterator currentBlock, int variableNumber, int blockNumber) {
 	
 	int numberOfBlockAfterEpp = ++MaximalNumberOfBlock;
 	
 	cout << "Type:" << (*currentBlock)->type << endl;
-	
 	cout << " (currentBlock)->translatedBlock: " << *(*currentBlock)->translatedBlock << endl;
 	
 	*(*currentBlock)->translatedBlock = "#" + to_string(variableNumber) + "=" + to_string(numberOfBlockAfterEpp);

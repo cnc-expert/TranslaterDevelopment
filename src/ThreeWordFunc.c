@@ -108,8 +108,3 @@ extern "C" void PrintCppString(void* str) {
 	cout << *x << endl;
 }
 
-extern "C" void PrintInt(int x) {
-	
-	cout << "Printing CppString in process. Please, wait..." << endl;
-	cout << x << endl;
-}

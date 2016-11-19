@@ -43,7 +43,6 @@
 
 prog:
 	block_list PROG_EOF { 
-		ChangeBlockNumber();
 		while(ProcessEppBlock());
 		PrintProgramDeque(); 
 		return 0; 

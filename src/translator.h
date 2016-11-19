@@ -71,8 +71,6 @@ void* CreateEPPBlock(char* lableOne,char*  labelTwo);
 int  ProcessEppBlock();
 void* CreateDelayDeque(char* blockStr);
 void* CreateURTBlock(char* value);
-void ChangeBlockNumber();
-void ChangeBlockNumber();
 #ifdef __cplusplus
 }
 #endif
