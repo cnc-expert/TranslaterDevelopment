@@ -18,12 +18,17 @@ t6: bin/${OUTF}
 	bin/${OUTF} < tests/t6
 t7: bin/${OUTF}
 	bin/${OUTF} < tests/t7
+t8: bin/${OUTF}
+	bin/${OUTF} < tests/t8
 
 bin/${OUTF}: src/lex.yy.c src/parser.tab.c bin/lexer.o bin/parser.o bin/main.o bin/translator.o
 	g++ -g bin/*.o -o bin/${OUTF} 
 
-bin/translator.o: src/translator.cpp bin
+bin/translator.o: src/translator.cpp bin/translate_epp.o
 	g++ -g -std=c++11 -c src/translator.cpp -o bin/translator.o
+
+bin/translate_epp.o: src/translate_epp.cpp bin
+	g++ -g -std=c++11 -c src/translate_epp.cpp -o bin/translate_epp.o
 
 bin/main.o: src/main.cpp bin
 	g++ -g -c src/main.cpp -o bin/main.o

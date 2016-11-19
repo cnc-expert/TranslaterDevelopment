@@ -16,27 +16,32 @@ enum typeOfBlock {TB_EPP, TB_ORDINARY};
 extern int CounterOfBlocks; // counter of the temporary blocks' numbers
 extern int MaximalNumberOfBlock;
 
-// map: lable -> temporary block number
+// Map: label -> temporary block number.
 extern map<char*, int> LabledBlocksTable;
 
+// Map: label -> block number.
+extern map<char*, int> MatchLabelAndNumberOfBlock;
+
+extern int getUnusedFanucVariable();
 
 class Block {
 	public:
 		string* translatedBlock;
 		int numberOfBlock;
-		int numberOfBlockGoTo;
 		enum typeOfBlock type;
 
 	Block() ;
 };
 
-class EppBlock : public Block{
+
+class EppBlock : public Block {
 	public:
 		char* labelOne;
 		char* labelTwo;
 
 	EppBlock();
 };
+
 
 extern deque<Block*> programFanuc;
 
