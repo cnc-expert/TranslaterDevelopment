@@ -21,7 +21,7 @@
 }
 
 %type<cppString> factor signed_item item expr expr_first_item_with_sign expr_block word iso_block 
-%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block prog
+%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block
 %type<tokenCodeMathFunc> func func2 
 %type<numberOrVariable> var_or_num
 %type<tokenSingleLetterFunc> addr
@@ -42,14 +42,11 @@
 
 
 prog:
-	block_list PROG_EOF{ 
+	block_list PROG_EOF { 
 		while(ProcessEppBlock());
 		PrintProgramDeque(); 
 		return 0; 
 	}
-	//block EOB prog { CreateProgramDeque($1); }
-//| block // PROG_EOF
-/*|	PROG_EOF	{ PrintProgramDeque(); return 0; }*/
 ;
 
 block_list:
@@ -58,8 +55,8 @@ block_list:
 ;
 
 block:
-	COMM  { $$ = CreateDefinedDequeForBlockString($1); }
-|	confirm_block /* Old version submit_block */
+	COMM  { $$ = CreateDefinedDequeForComments($1); }
+|	confirm_block
 ;
 
 confirm_block:

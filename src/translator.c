@@ -28,7 +28,6 @@ int MaximalNumberOfBlock = 0;
 // map: lable -> temporary block number
 map<string, int> LabledBlocksTable;
 
-map<string, int> UsedVariableTable; // table containing the variables in use (type "set")
 
 
 deque<Block*> programFanuc;
@@ -169,22 +168,20 @@ extern "C" void* CreateDefinedDequeForBlockString(char* blockStr) {
 
 extern "C" void* CreateDefinedDequeForComments(char* blockStr) {
 
-	//cout << "CreateDefinedDequeForBlockString in process..." << endl;
 	Block* blockObject = new Block();
-	blockObject->translatedBlock = new string(blockStr);
 
+	blockObject->translatedBlock = new string(blockStr);
 	replace(blockObject->translatedBlock->begin(),blockObject->translatedBlock->end(), ')', ' ');
 	replace(blockObject->translatedBlock->begin(),blockObject->translatedBlock->end(), '(', ' ');
-
 	*blockObject->translatedBlock = ("(" + *blockObject->translatedBlock + ")");
+
 	deque<Block*> *programFanuc = new deque<Block*>();
-
 	programFanuc->push_back(blockObject);
-
-	//cout << programFanuc->size() << endl;;
 
 	return programFanuc;
 }
+
+
 
 extern "C" void* CreateDequeForBlockString(void* blockStr) {
 
@@ -203,15 +200,18 @@ extern "C" void* CreateDequeForBlockString(void* blockStr) {
 
 
 int GetVariableNCIndexForFanuc(char* variableNC) { // get the index of variable in NC code
-	string var = string(variableNC);
-	if ( UsedVariableTable.find(var) == UsedVariableTable.end() ) {
 
-		UsedVariableTable[var] = *EmptyVariablesIndexTable.begin();
+	// table containing the variables in use (type "set")
+	static map<char*, int> UsedVariableTable;
+
+	if ( UsedVariableTable.find(variableNC) == UsedVariableTable.end() ) {
+
+		UsedVariableTable[variableNC] = *EmptyVariablesIndexTable.begin();
 		EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
 
 	}
 
-	return UsedVariableTable[var];
+	return UsedVariableTable[variableNC];
 }
 
 bool ValidateExpressionAboutDot(string expressionStr) { // validation

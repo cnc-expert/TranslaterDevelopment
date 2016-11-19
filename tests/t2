@@ -1,0 +1,13 @@
+;ISO blocks testing
+
+;SVERLO D18
+T1.1 M16
+S1600 M3
+G0 X0 Y0
+Z3 M8
+G1 Z-30 F0.1 
+G0 Z100 M9
+G79 Z0 M5
+G79 X0 Y0
+M2
+
