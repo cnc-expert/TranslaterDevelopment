@@ -1,9 +1,16 @@
+/*
+ * EPP three-letter-code processing.
+ */
+
+
 #include "translator.h"
+
 
 using namespace std;
 
 
-EppBlock ::EppBlock() {
+
+EppBlock::EppBlock() {
 	numberOfBlock = CounterOfBlocks++;
 	type = TB_EPP;
 	labelOne = NULL;
@@ -11,11 +18,13 @@ EppBlock ::EppBlock() {
 }
 
 
+
 // Mapping: Label -> fanuc variable for callback.
 static map<char*, int> MatchLabelAndVariable;
 
 // Mapping: LableTwo -> number of highest block in EPP pairs.
 static map<char*, int> MatchLabels;
+
 
 
 extern "C" void* CreateEPPBlock(char* labelOne,char*  labelTwo){
@@ -51,6 +60,7 @@ static void SetMinimalBlockNumber(EppBlock *b) {
 }
 
 
+
 static deque<Block*>::iterator FindBlock(char* label){
 	int numBlock = LabledBlocksTable[label];
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
@@ -62,6 +72,7 @@ static deque<Block*>::iterator FindBlock(char* label){
 }
 
 
+
 static deque<Block*>::iterator FindFrontEppBlock(){
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
@@ -71,6 +82,7 @@ static deque<Block*>::iterator FindFrontEppBlock(){
 	}
 	return programFanuc.end();
 }
+
 
 
 static void TranslateEppBlock(deque<Block*>::iterator currentBlock, int variableNumber, int blockNumberToGo) {
@@ -90,6 +102,9 @@ static void TranslateEppBlock(deque<Block*>::iterator currentBlock, int variable
 }
 
 
+
+/* Find first EPP block and process it.
+   Returns 0 if no EPP block in fanucProgram. */
 extern "C" int ProcessEppBlock() {
 
 	auto firstEpp = FindFrontEppBlock();
@@ -105,6 +120,7 @@ extern "C" int ProcessEppBlock() {
 	/* Check the highest label */
 	SetMinimalBlockNumber(curEppBlock);
 
+
 	if ( MatchLabelAndNumberOfBlock.find(curEppBlock->labelOne) == MatchLabelAndNumberOfBlock.end() ) {
 
 		Block* NBlock = new Block();
@@ -117,18 +133,20 @@ extern "C" int ProcessEppBlock() {
 		
 		MatchLabelAndNumberOfBlock[curEppBlock->labelOne] = MaximalNumberOfBlock;
 	}
-	
+
+
 	if ( MatchLabelAndVariable.find(curEppBlock->labelTwo) == MatchLabelAndVariable.end() ) {
 		
-		Block* VarBlock = new Block();				
+		Block* GotoBlock = new Block();				
 		int VariableForLabel = getUnusedFanucVariable();
-		VarBlock->translatedBlock = new string(string("GOTO #") + to_string(VariableForLabel));
+		GotoBlock->translatedBlock = new string(string("GOTO #") + to_string(VariableForLabel));
 		
 		auto secondLabelBlock = FindBlock(curEppBlock->labelTwo);
-		programFanuc.insert(secondLabelBlock, VarBlock);
+		programFanuc.insert(secondLabelBlock, GotoBlock);
 		
 		MatchLabelAndVariable[curEppBlock->labelTwo] = VariableForLabel;
 	}
+
 
 	// add function for addition of number block
 	if ( MatchLabelAndNumberOfBlock.find(curEppBlock->labelTwo) == MatchLabelAndNumberOfBlock.end() ) {

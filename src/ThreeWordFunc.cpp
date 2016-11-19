@@ -102,7 +102,7 @@ extern "C" void* ConvertCharToCppString(char* tokenNum) {
 
 extern "C" void* SubstituteNCvarAsCppString(char* tokenVar) {
 	string *fanucVarString = new string("#");
-	*fanucVarString += to_string(GetVariableNCIndexForFanuc(tokenVar));
+	*fanucVarString += to_string(MatchinFanucVariableToNC(tokenVar));
 
 	return fanucVarString;
 }

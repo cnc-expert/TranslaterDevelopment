@@ -50,7 +50,7 @@ extern map <int, string> SingleLetterFunctionTable;
 
 extern map <int, int> GCodeTable;
 
-int GetVariableNCIndexForFanuc(char* variableNC);
+int MatchinFanucVariableToNC(char* variableNC);
 
 extern "C"{
 #endif

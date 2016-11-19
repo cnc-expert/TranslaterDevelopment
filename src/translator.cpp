@@ -60,34 +60,6 @@ map <int, int> GCodeTable = {
 };
 
 
-set<int> CreateEmptyVariablesIndexTable() {
-
-	set<int> emptyVariablesTableTmp;
-
-	for (int i = 100; i <= 199; i++) {
-		emptyVariablesTableTmp.insert(i);
-	}
-
-	for (int i = 500; i <= 999; i++) {
-		emptyVariablesTableTmp.insert(i);
-	}
-
-	return emptyVariablesTableTmp;
-}
-
-// Table containing only unused variables.
-set<int> EmptyVariablesIndexTable = CreateEmptyVariablesIndexTable();
-
-int getUnusedFanucVariable() {
-	
-	int unusedVariable = *EmptyVariablesIndexTable.begin();
-	EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
-
-	return unusedVariable;
-}
-
-
-
 extern "C" void PrintProgramDeque() {
 	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
 	while (!programFanuc.empty()) {
@@ -161,19 +133,25 @@ extern "C" void* AddLabelToDequeOfBlock(void* dequeObject, char* label) {
 
 
 
-extern "C" void* CreateDefinedDequeForBlockString(char* blockStr) {
+extern "C" void* CreateDequeForBlockString(void* blockStr) {
 
-	//cout << "CreateDefinedDequeForBlockString in process..." << endl;
 	Block* blockObject = new Block();
-	blockObject->translatedBlock = new string(blockStr);
+	blockObject->translatedBlock = (string*)blockStr;
 
-	deque<Block*> *programFanuc = new deque<Block*>();
+	deque<Block*> *blocks = new deque<Block*>();
 
-	programFanuc->push_back(blockObject);
+	blocks->push_back(blockObject);
 
-	//cout << programFanuc->size() << endl;;
+	return blocks;
+}
 
-	return programFanuc;
+
+
+extern "C" void* CreateDefinedDequeForBlockString(char* blockStr) {
+	
+	string *s = new string(blockStr);
+
+	return CreateDequeForBlockString(s);
 }
 
 
@@ -196,34 +174,7 @@ extern "C" void* CreateDefinedDequeForComments(char* blockStr) {
 
 
 
-extern "C" void* CreateDequeForBlockString(void* blockStr) {
 
-	Block* blockObject = new Block();
-	blockObject->translatedBlock = (string*)blockStr;
-
-	deque<Block*> *programFanuc = new deque<Block*>();
-
-	programFanuc->push_back(blockObject);
-
-	return programFanuc;
-}
-
-
-
-
-
-int GetVariableNCIndexForFanuc(char* variableNC) { // get the index of variable in NC code
-
-	// table containing the variables in use (type "set")
-	static map<char*, int> UsedVariableTable;
-
-	if ( UsedVariableTable.find(variableNC) == UsedVariableTable.end() ) {
-
-		UsedVariableTable[variableNC] = getUnusedFanucVariable();
-	}
-
-	return UsedVariableTable[variableNC];
-}
 
 bool ValidateExpressionAboutDot(string expressionStr) { // validation
 	// add T.19
@@ -280,7 +231,7 @@ extern "C" void* TranslateExpressionBlock(char* variableNC, void* expression) {
 	//cout << "Translating expression block in process. Please, wait..." << endl;
 
 	string* x = (string*)expression;
-	*x = "#" + to_string(GetVariableNCIndexForFanuc(variableNC)) + "=" + *x; // E15 --> #100
+	*x = "#" + to_string(MatchinFanucVariableToNC(variableNC)) + "=" + *x; // E15 --> #100
 	
 	
 	return (void*)x;
@@ -339,7 +290,7 @@ extern "C" void* CreateDelayDeque(char* blockStr) {
 	blockObject->translatedBlock = new string("G4 X");
 	if (blockStr[0] == 'E')
 	{
-		*blockObject->translatedBlock += string("#") + to_string(GetVariableNCIndexForFanuc(blockStr));
+		*blockObject->translatedBlock += string("#") + to_string(MatchinFanucVariableToNC(blockStr));
 	}
 	else
 		*blockObject->translatedBlock += blockStr;

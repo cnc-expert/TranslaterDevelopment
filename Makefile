@@ -24,11 +24,14 @@ t8: bin/${OUTF}
 bin/${OUTF}: src/lex.yy.c src/parser.tab.c bin/lexer.o bin/parser.o bin/main.o bin/translator.o
 	g++ -g bin/*.o -o bin/${OUTF} 
 
-bin/translator.o: src/translator.cpp bin/translate_epp.o
+bin/translator.o: src/translator.cpp bin/translate_epp.o bin/fanuc_vars.o
 	g++ -g -std=c++11 -c src/translator.cpp -o bin/translator.o
 
 bin/translate_epp.o: src/translate_epp.cpp bin
 	g++ -g -std=c++11 -c src/translate_epp.cpp -o bin/translate_epp.o
+
+bin/fanuc_vars.o: src/fanuc_vars.cpp bin
+	g++ -g -std=c++11 -c src/fanuc_vars.cpp -o bin/fanuc_vars.o
 
 bin/main.o: src/main.cpp bin
 	g++ -g -c src/main.cpp -o bin/main.o
