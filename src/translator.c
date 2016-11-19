@@ -26,7 +26,7 @@ int CounterOfBlocks = 0; // counter of the temporary blocks' numbers
 int MaximalNumberOfBlock = 0;
 
 // map: lable -> temporary block number
-map<string, int> LabledBlocksTable;
+map<char*, int> LabledBlocksTable;
 
 
 
@@ -139,7 +139,7 @@ extern "C" void* AddLabelToDequeOfBlock(void* dequeObject, char* label) {
 	deque<Block*>* dequeTmp = (deque<Block*>*)dequeObject;
 	dequeTmp->front()->numberOfBlock = CounterOfBlocks;
 
-	LabledBlocksTable[string(label)] = CounterOfBlocks;
+	LabledBlocksTable[label] = CounterOfBlocks;
 
 	CounterOfBlocks++;
 
@@ -302,7 +302,7 @@ extern "C" void* CreateEPPBlock(char* labelOne,char*  labelTwo){
 }
 
 deque<Block*>::iterator FindBlock(char* label){
-	int numBlock = LabledBlocksTable[string(label)];
+	int numBlock = LabledBlocksTable[label];
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
 		if((*curBlock)->numberOfBlock == numBlock)
@@ -321,7 +321,7 @@ extern "C" void* AddGOTOBlock(char* label)
 	deque<Block*> *programFanuc = new deque<Block*>();
 	blockObject->translatedBlock = new string("GOTO ");
 	++MaximalNumberOfBlock;
-	int numBlock = LabledBlocksTable[string(label)] + MaximalNumberOfBlock;
+	int numBlock = LabledBlocksTable[label] + MaximalNumberOfBlock;
 	
 	programFanuc->push_back(blockObject);
 
