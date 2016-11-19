@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+extern int linenum;
+
 void yyerror (const char *s);
 char* AddToSymbolTable(char* yytext);
 

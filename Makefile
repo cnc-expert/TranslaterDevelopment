@@ -11,6 +11,10 @@ t3: bin/${OUTF}
 	bin/${OUTF} < tests/t3
 t4: bin/${OUTF}
 	bin/${OUTF} < tests/t4
+t5: bin/${OUTF}
+	bin/${OUTF} < tests/t5
+t6: bin/${OUTF}
+	bin/${OUTF} < tests/t6
 
 bin/${OUTF}: src/lex.yy.c src/nc.tab.c bin/lexer.o bin/parser.o bin/main.o bin/translator.o
 	g++ -g bin/*.o -o bin/${OUTF} 

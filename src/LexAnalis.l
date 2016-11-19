@@ -49,6 +49,7 @@ BNC { BEGIN(expect_labl); return BNC; }
 EPP { BEGIN(expect_labl); return EPP; }
 DIS { BEGIN(dis); return DIS;}
 DLY { return DLY; }
+UAO { return UAO; }
 URT { return URT; }
 UCG { return UCG; }
 MIR { return MIR; }
@@ -66,7 +67,8 @@ ERP { return ERP; }
 
 
 	/* End of block token */
-\r?\n+ {	
+\r?\n|\r {
+	linenum++;
 	return EOB;
 }
 

@@ -7,9 +7,13 @@
 using namespace std;
 
 
+int linenum = 0;
+
+
 extern "C" void yyerror (const char *s)
 {
 	cerr << s << endl;
+	cerr << "\tError occured at line: " << linenum+1 << endl;
 }
 
 

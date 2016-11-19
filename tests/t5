@@ -1,0 +1,30 @@
+;EPP & DLY test
+;SVERLENIE OTVERSTIY
+
+E30=1
+
+;SVERLO D18
+T1.1 M16
+;S1600 M3 -> 'S' doesn't processed
+
+G0 X100 Y100
+"DRSTR"
+  Z3 M8
+  ;G1 Z-30 F0.1 -> 'F' doesn't processed
+  (DLY,0.5)
+  G0 Z100
+  (DLY,E30)
+"DREND"
+
+X-100 Y100
+(EPP,DRSTR,DREND)
+
+X-100 Y-100
+(EPP,DRSTR,DREND)
+
+X100 Y-100
+(EPP,DRSTR,DREND)
+
+G79 Z0 M9
+G79 X0 Y0 M5
+M2
