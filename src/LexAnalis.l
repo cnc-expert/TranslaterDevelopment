@@ -21,7 +21,7 @@ wsp			[ \t]*
 
 
 	/* Commentary token */
-;.* {
+;[^\n\r]+ {
 	yylval.comment = AddToSymbolTable(yytext + 1); /* yytext -> char* type */
 	return COMM;
 }

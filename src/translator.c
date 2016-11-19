@@ -21,13 +21,18 @@ EppBlock ::EppBlock() {
 		type = TB_EPP;
 	}
 
+	
+
 
 int CounterOfBlocks = 0; // counter of the temporary blocks' numbers
 int MaximalNumberOfBlock = 0;
 
-// map: lable -> temporary block number
 map<char*, int> LabledBlocksTable;
 
+// map: lable -> temporary block number
+map<char*, int> MatchLabelAndNumberOfBlock;
+map<char*, int> MatchLabelAndVariable;
+map<char*, int> MatchLabels; // Lable2 and highest label ( Label1 ) for EPP function
 
 
 deque<Block*> programFanuc;
@@ -138,6 +143,13 @@ extern "C" void* AddLabelToDequeOfBlock(void* dequeObject, char* label) {
 
 	deque<Block*>* dequeTmp = (deque<Block*>*)dequeObject;
 	dequeTmp->front()->numberOfBlock = CounterOfBlocks;
+	
+	string* tmpStr = new string(label);
+	// add lable name as comment
+	*tmpStr = "(" + *tmpStr + ") " + *dequeTmp->front()->translatedBlock;
+	delete dequeTmp->front()->translatedBlock;
+	
+	dequeTmp->front()->translatedBlock = tmpStr;
 
 	LabledBlocksTable[label] = CounterOfBlocks;
 
@@ -173,6 +185,7 @@ extern "C" void* CreateDefinedDequeForComments(char* blockStr) {
 	blockObject->translatedBlock = new string(blockStr);
 	replace(blockObject->translatedBlock->begin(),blockObject->translatedBlock->end(), ')', ' ');
 	replace(blockObject->translatedBlock->begin(),blockObject->translatedBlock->end(), '(', ' ');
+	
 	*blockObject->translatedBlock = ("(" + *blockObject->translatedBlock + ")");
 
 	deque<Block*> *programFanuc = new deque<Block*>();
@@ -226,7 +239,7 @@ bool ValidateExpressionAboutDot(string expressionStr) { // validation
 	}
 }
 
-extern "C" void* TranslateWordWithNumber(int address, const char* sign, char* number) {
+extern "C" void* TranslateWordWithNumber(int address, const char* sign, const char* number) {
 
 	string* resultWord = new string("");
 	string expressionBeforeDot;
@@ -270,6 +283,8 @@ extern "C" void* TranslateExpressionBlock(char* variableNC, void* expression) {
 
 	string* x = (string*)expression;
 	*x = "#" + to_string(GetVariableNCIndexForFanuc(variableNC)) + "=" + *x; // E15 --> #100
+	
+	
 	return (void*)x;
 }
 
@@ -277,10 +292,12 @@ extern "C" void* TranslateExpressionBlock(char* variableNC, void* expression) {
 extern "C" void* TranslateWordWithVariable(int address, char* variable)
 {
 	string* resultWord = new string("");
-
-	*resultWord = to_string(address) + "#" + to_string(GetVariableNCIndexForFanuc(variable));
-
-	return (void*)resultWord;
+	
+	//*resultWord = to_string(address) + "#" + to_string(GetVariableNCIndexForFanuc(variable));
+	
+	return  TranslateWordWithNumber(address,"", ("#" + to_string(GetVariableNCIndexForFanuc(variable))).c_str() );
+	
+	
 }
 
 
@@ -301,7 +318,7 @@ extern "C" void* CreateEPPBlock(char* labelOne,char*  labelTwo){
 	return programFanuc;
 }
 
-deque<Block*>::iterator FindBlock(char* label){
+static deque<Block*>::iterator FindBlock(char* label){
 	int numBlock = LabledBlocksTable[label];
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
@@ -331,60 +348,111 @@ extern "C" void* AddGOTOBlock(char* label)
 	
 }
 
-extern "C" int ProcessEppBlock(){
+extern "C" void ChangeBlockNumber() {
+	
+	/*for (auto curBlock = programFanuc.end(); curBlock!= programFanuc.begin(); curBlock-- ) {
+		if ( curBlock.numberOfBlock != -1 ) 
+			(*curBlock).numberOfBlock += MaximalNumberOfBlock;
+		
+	}*/
+}
+
+void TranslateEppBlock(deque<Block*>::iterator currentBlock, int variableNumber, int blockNumber) {
+	
+	int numberOfBlockAfterEpp = ++MaximalNumberOfBlock;
+	
+	cout << "Type:" << (*currentBlock)->type << endl;
+	
+	cout << " (currentBlock)->translatedBlock: " << *(*currentBlock)->translatedBlock << endl;
+	
+	*(*currentBlock)->translatedBlock = "#" + to_string(variableNumber) + "=" + to_string(numberOfBlockAfterEpp);
+	
+	
+	Block* NBlock = new Block();				
+	NBlock->translatedBlock =  new string( string("N") + to_string(numberOfBlockAfterEpp) );
+	
+	programFanuc.insert(currentBlock, NBlock);
+	
+	NBlock = new Block();				
+	NBlock->translatedBlock =  new string( string("GOTO ") + to_string(blockNumber) );
+	
+	programFanuc.insert(currentBlock, NBlock);
+	
+}
 
 
-	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
-		/*if (*(*curBlock)->translatedBlock == "EppBlock")
-			cout << "Epp" << (*curBlock)->type << endl;
-		else 
-			cout << *(*curBlock)->translatedBlock << (*curBlock)->type<< endl;*/
-		if((*curBlock)->type == TB_EPP) {
+extern "C" int ProcessEppBlock() {
+
+	
+	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ) {
+		if( (*curBlock)->type == TB_EPP ) {
 			
 			(*curBlock)->type = TB_ORDINARY;
+			
 			Block* tmpCurBlock = *curBlock;
-			EppBlock* tmp = (EppBlock*)tmpCurBlock;
-
-			int metka = *EmptyVariablesIndexTable.begin();
-			EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
-			int fisrtFreeCadr = ++MaximalNumberOfBlock;
-			*tmp->translatedBlock =  string("#") + to_string(metka)+ "=" +to_string(fisrtFreeCadr);
-
-
-			Block* GoToBlock = new Block();
-			int secondFreeCadr = ++MaximalNumberOfBlock;
-			GoToBlock->translatedBlock = new string(string("GOTO ") + to_string(secondFreeCadr)) ;
-
-			Block* NBlock = new Block();
-			NBlock->translatedBlock =  new string(string("N") + to_string(fisrtFreeCadr));
-
-			programFanuc.insert(curBlock, NBlock);
-			programFanuc.insert(curBlock, GoToBlock);
-
-
-			auto FisrtBlock = FindBlock(tmp->labelOne);
-
-			Block* SecondCadrVariableWithCallbackAddress = new Block();
-			SecondCadrVariableWithCallbackAddress->translatedBlock =  new string(string("#") + to_string(metka)+string("=")+ to_string(++MaximalNumberOfBlock));
-			programFanuc.insert(FisrtBlock+1, SecondCadrVariableWithCallbackAddress);
-
-			Block* SecondCadrNumber = new Block();
-			SecondCadrNumber->translatedBlock =  new string(string("N")+ to_string(secondFreeCadr));
-			programFanuc.insert(FisrtBlock+1, SecondCadrNumber);
-
-
-			auto SecondBlock = FindBlock(tmp->labelTwo) + 1;
-
-			Block* SecondCadrNumber1 = new Block();
-			SecondCadrNumber1->translatedBlock =   new string(string("N")+ to_string(MaximalNumberOfBlock));
-			programFanuc.insert(SecondBlock, SecondCadrNumber1);
-
-			Block* SecondCadrGoToBlock = new Block();
-			SecondCadrGoToBlock->translatedBlock =  new string(string("GOTO #") + to_string(metka));
-			programFanuc.insert(SecondBlock, SecondCadrGoToBlock);
+			EppBlock* curEppBlock = (EppBlock*)tmpCurBlock;
+			
+			if ( MatchLabels.find(curEppBlock->labelTwo) != MatchLabels.end() ) {
+				// addition to MatchLabels
+				MatchLabels[curEppBlock->labelTwo] = LabledBlocksTable[curEppBlock->labelOne];
+			}
+			else {
+				
+				if (MatchLabels[curEppBlock->labelTwo] > LabledBlocksTable[curEppBlock->labelOne]) {
+					MatchLabels[curEppBlock->labelTwo] = LabledBlocksTable[curEppBlock->labelOne];
+				}
+				
+			}
+			
+			if ( MatchLabelAndNumberOfBlock.find(curEppBlock->labelOne) == MatchLabelAndNumberOfBlock.end() ) {
+				auto firstLabelBlock = FindBlock(curEppBlock->labelOne);
+				Block* NBlock = new Block();
+				
+				firstLabelBlock++;
+				
+				NBlock->translatedBlock =  new string(string("N") + to_string(++MaximalNumberOfBlock));
+				
+				programFanuc.insert(firstLabelBlock, NBlock);
+				
+				MatchLabelAndNumberOfBlock[curEppBlock->labelOne] = MaximalNumberOfBlock;
+			}
+			// add function for addition of number block
+			if ( MatchLabelAndNumberOfBlock.find(curEppBlock->labelTwo) == MatchLabelAndNumberOfBlock.end() ) {
+				auto secondLabelBlock = FindBlock(curEppBlock->labelTwo);
+				
+				secondLabelBlock++;
+				
+				Block* NBlock = new Block();				
+				NBlock->translatedBlock =  new string(string("N") + to_string(++MaximalNumberOfBlock));
+				
+				programFanuc.insert(secondLabelBlock, NBlock);
+				
+				MatchLabelAndNumberOfBlock[curEppBlock->labelTwo] = MaximalNumberOfBlock;
+			}
+			
+			if ( MatchLabelAndVariable.find(curEppBlock->labelTwo) == MatchLabelAndVariable.end() ) {
+				auto secondLabelBlock = FindBlock(curEppBlock->labelTwo);
+				
+				secondLabelBlock++; // for insert GOTO
+				secondLabelBlock++;
+				
+				// add function then
+				int VariableForLabel = *EmptyVariablesIndexTable.begin();
+				EmptyVariablesIndexTable.erase(EmptyVariablesIndexTable.begin());
+				
+				Block* NBlock = new Block();				
+				NBlock->translatedBlock =  new string(string("GOTO #") + to_string(VariableForLabel));
+				
+				programFanuc.insert(secondLabelBlock, NBlock);
+				
+				MatchLabelAndVariable[curEppBlock->labelTwo] = VariableForLabel;
+				
+			}
+			
+			TranslateEppBlock(curBlock, MatchLabelAndVariable[curEppBlock->labelTwo], MatchLabelAndNumberOfBlock[curEppBlock->labelOne]);
+			
 			return 1;
 		}
-		
 	}
 	return 0;
 }

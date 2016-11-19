@@ -43,6 +43,7 @@
 
 prog:
 	block_list PROG_EOF { 
+		ChangeBlockNumber();
 		while(ProcessEppBlock());
 		PrintProgramDeque(); 
 		return 0; 
@@ -94,7 +95,7 @@ word:
 ;
 
 addr:
-	axis { $$ = $1; } | I | J | K | R
+	axis { $$ = $1; } | I | J | K | R | S | F 
 |	T | G | M
 ;
 

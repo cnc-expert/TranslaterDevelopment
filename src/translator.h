@@ -58,7 +58,7 @@ void* CreateDefinedDequeForComments(char* blockStr);
 void* CreateDequeForBlockString(void* blockStr);
 void* ConcatCppString(void* arg1, void* arg2);
 void PrintCppString(void* str);
-void* TranslateWordWithNumber(int address, const char* sign, char* number);
+void* TranslateWordWithNumber(int address, const char* sign, const char* number);
 void* TranslateWordWithVariable(int address, char* variable);
 void* TranslateExpressionBlock(char* variableNC,	void* expression);
 void* ExecuteNegativeOperation(void* expression);
@@ -71,6 +71,8 @@ void* CreateEPPBlock(char* lableOne,char*  labelTwo);
 int  ProcessEppBlock();
 void* CreateDelayDeque(char* blockStr);
 void* CreateURTBlock(char* value);
+void ChangeBlockNumber();
+void ChangeBlockNumber();
 #ifdef __cplusplus
 }
 #endif
