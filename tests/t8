@@ -29,6 +29,85 @@ X-100 Y100
 X-100 Y-100
 (EPP,DRSTR,DRSHF)
 
+;----- Here is the middle label 'DREND' used as labelOne and as labelTwo. -----
+X100 Y-100
+(EPP,DRSTR,DREND)
+(EPP,DREND,DRSHF)
+
 G79 Z0 M9
 G79 X0 Y0 M5
+M0
+
+
+
+;----- Here is label 'OBNKON' used as labelTwo in different pairs. -----
+N20 (DIS, "RASFREZEROVKA OTV")
+G0 G29 G40 G90 G79 Z0
+G95
+;(UAO,2)
+;(URT,0)
+;FREZA D4
+T1.1 M16
+S1600 M3 
+
+G0 X100 Y100 M8
+"OBNIZ1"
+   Z3
+   G1 Z-2 F1
+   G41 G91 X6 F0.2
+   G3 X-12 R6
+   G40 X12 R6
+   G1 X-6
+   G0 G90 Z100
+"OBNIZ2"
+   Z3
+   G1 Z-5 F1
+   G41 G91 X4 F0.2
+   G3 X-8 R4
+   G40 X8 R4
+   G1 X-4
+   G0 G90 Z100
+"OBNKON"
+
+X-100 Y100
+(EPP,OBNIZ2,OBNKON)
+
+X-100 Y-100
+(EPP,OBNIZ1,OBNKON)
+
+X100 Y-100
+(EPP,OBNIZ2,OBNKON)
+
+G79 Z0 M9
+G79 X0 Y0 M5
+M0
+
+
+
+;----- Here is labels are below of EPP call. -----
+N20 (DIS, "RASFREZEROVKA CENTR OTV")
+G0 G29 G40 G90 G79 Z0
+G95
+;(UAO,2)
+;(URT,0)
+;FREZA D4
+T1.1 M16
+S1600 M3 
+
+(EPP,CENBEG,CENEND)
+
+G79 Z0 M9
+G79 X0 Y0 M5
+M2
+
+"CENBEG"
+	G0 X0 Y0
+	Z3
+	G1 Z0 F0.5
+	G41 X5
+	;G3 G40 X5 Y0 Z-5 R5 K5  -> address 'K' doesn't work
+	G3 G40 X5 Y0 Z-5 R5
+	G1 X-5
+	G0 Z100
+"CENEND"
 M2

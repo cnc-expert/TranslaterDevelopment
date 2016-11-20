@@ -61,7 +61,8 @@ static void SetMinimalBlockNumber(EppBlock *b) {
 
 
 
-static deque<Block*>::iterator FindBlock(char* label){
+/* Find block by the label. */
+static deque<Block*>::iterator FindLabeledBlock(char* label){
 	int numBlock = LabledBlocksTable[label];
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
@@ -73,10 +74,11 @@ static deque<Block*>::iterator FindBlock(char* label){
 
 
 
-static deque<Block*>::iterator FindFrontEppBlock(){
+/* Find first occurrence block by it's type. */
+static deque<Block*>::iterator FindFrontTypedBlock(enum typeOfBlock type){
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
-		if( (*curBlock)->type == TB_EPP ) {
+		if( (*curBlock)->type == type ) {
 			return curBlock;
 		}
 	}
@@ -85,31 +87,35 @@ static deque<Block*>::iterator FindFrontEppBlock(){
 
 
 
-static void TranslateEppBlock(deque<Block*>::iterator currentBlock, int variableNumber, int blockNumberToGo) {
+/* Substitue EPP block by three blocks:
+   1) var with callback address,   2) GOTO block,   3) numbered block to return. */
+static void TranslateFirstEppBlock(int variableNumber, int blockNumberToGo) {
 	
+	auto firstEppBlock = FindFrontTypedBlock(TB_EPP);
+	(*firstEppBlock)->type = TB_ORDINARY;
+
 	int numberOfBlockAfterEpp = ++MaximalNumberOfBlock;
-	
-	*(*currentBlock)->translatedBlock = "#" + to_string(variableNumber) + "=" + to_string(numberOfBlockAfterEpp);
+	*(*firstEppBlock)->translatedBlock = "#" + to_string(variableNumber) + "=" + to_string(numberOfBlockAfterEpp);
 	
 	Block *b = new Block();				
 	b->translatedBlock = new string( string("GOTO ") + to_string(blockNumberToGo) );
-	programFanuc.insert(currentBlock+1, b);
+	firstEppBlock = programFanuc.insert(firstEppBlock+1, b);
 	
 	b = new Block();				
 	b->translatedBlock = new string( string("N") + to_string(numberOfBlockAfterEpp) );
-	programFanuc.insert(currentBlock+2, b);
+	programFanuc.insert(firstEppBlock+1, b);
 	
 }
 
 
 
 /* Find first EPP block and process it.
-   Returns 0 if no EPP block in fanucProgram. */
+   Returns 0 if there are no EPP blocks in fanucProgram. */
 extern "C" int ProcessEppBlock() {
 
-	auto firstEpp = FindFrontEppBlock();
+	auto firstEpp = FindFrontTypedBlock(TB_EPP);
 	if (firstEpp == programFanuc.end()) {
-		/* There is no unprocessed EPP in programFanuc */
+		/* There is no unprocessed EPPs in programFanuc */
 
 		return 0;
 	}
@@ -128,7 +134,7 @@ extern "C" int ProcessEppBlock() {
 		                                     to_string(++MaximalNumberOfBlock) +
 		                                     " (" + curEppBlock->labelOne + ")");
 		
-		auto firstLabelBlock = FindBlock(curEppBlock->labelOne);
+		auto firstLabelBlock = FindLabeledBlock(curEppBlock->labelOne);
 		programFanuc.insert(firstLabelBlock, NBlock);
 		
 		MatchLabelAndNumberOfBlock[curEppBlock->labelOne] = MaximalNumberOfBlock;
@@ -141,7 +147,7 @@ extern "C" int ProcessEppBlock() {
 		int VariableForLabel = getUnusedFanucVariable();
 		GotoBlock->translatedBlock = new string(string("GOTO #") + to_string(VariableForLabel));
 		
-		auto secondLabelBlock = FindBlock(curEppBlock->labelTwo);
+		auto secondLabelBlock = FindLabeledBlock(curEppBlock->labelTwo);
 		programFanuc.insert(secondLabelBlock, GotoBlock);
 		
 		MatchLabelAndVariable[curEppBlock->labelTwo] = VariableForLabel;
@@ -156,15 +162,13 @@ extern "C" int ProcessEppBlock() {
 		                                      to_string(++MaximalNumberOfBlock) +
 		                                      " (" + curEppBlock->labelTwo + ")");
 		
-		auto secondLabelBlock = FindBlock(curEppBlock->labelTwo);
+		auto secondLabelBlock = FindLabeledBlock(curEppBlock->labelTwo);
 		programFanuc.insert(secondLabelBlock, NBlock);
 		
 		MatchLabelAndNumberOfBlock[curEppBlock->labelTwo] = MaximalNumberOfBlock;
 	}
 	
-	firstEpp = FindFrontEppBlock(); /* Bug was here: modifing the deque object discards all previously stated iterators? */
-	(*firstEpp)->type = TB_ORDINARY;
-	TranslateEppBlock(firstEpp, MatchLabelAndVariable[curEppBlock->labelTwo], MatchLabelAndNumberOfBlock[curEppBlock->labelOne]);
+	TranslateFirstEppBlock(MatchLabelAndVariable[curEppBlock->labelTwo], MatchLabelAndNumberOfBlock[curEppBlock->labelOne]);
 	
 	return 1;
 }
