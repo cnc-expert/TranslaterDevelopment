@@ -8,6 +8,7 @@
 #include <set>
 #include <deque>
 #include <algorithm>
+
 using namespace std;
 
 enum typeOfBlock {TB_EPP, TB_ORDINARY};
@@ -15,21 +16,25 @@ enum typeOfBlock {TB_EPP, TB_ORDINARY};
 extern int CounterOfBlocks; // counter of the temporary blocks' numbers
 extern int MaximalNumberOfBlock;
 
-// map: lable -> temporary block number
+// Map: label -> temporary block number.
 extern map<char*, int> LabledBlocksTable;
 
+// Map: label -> block number.
+extern map<char*, int> MatchLabelAndNumberOfBlock;
+
+extern int getUnusedFanucVariable();
 
 class Block {
 	public:
 		string* translatedBlock;
 		int numberOfBlock;
-		int numberOfBlockGoTo;
 		enum typeOfBlock type;
 
 	Block() ;
 };
 
-class EppBlock : public Block{
+
+class EppBlock : public Block {
 	public:
 		char* labelOne;
 		char* labelTwo;
@@ -37,12 +42,15 @@ class EppBlock : public Block{
 	EppBlock();
 };
 
+
 extern deque<Block*> programFanuc;
 
 // X Y Z G M T F S N R I J K
 extern map <int, string> SingleLetterFunctionTable;
 
 extern map <int, int> GCodeTable;
+
+int MatchinFanucVariableToNC(char* variableNC);
 
 extern "C"{
 #endif
@@ -65,14 +73,13 @@ void* ExecuteNegativeOperation(void* expression);
 void* ExecuteArithmeticOperation(void* leftExpression, char sign, void* rightExpression);
 void* PutExpressionInBrackets(void* expression);
 void* ConvertCharToCppString(char* tokenNum);
+void* SubstituteNCvarAsCppString(char *tokenVar);
 void* TranslateFunction(int function, void* expression);
 void* TranslateFunctionWithTwoArguments(int function, void* firstExpression, void* secondExpression);
 void* CreateEPPBlock(char* lableOne,char*  labelTwo);
 int  ProcessEppBlock();
 void* CreateDelayDeque(char* blockStr);
 void* CreateURTBlock(char* value);
-void ChangeBlockNumber();
-void ChangeBlockNumber();
 #ifdef __cplusplus
 }
 #endif

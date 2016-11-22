@@ -1,4 +1,4 @@
-#include "nc.tab.h"
+#include "parser.tab.h"
 
 #include <iostream>
 #include <string>
@@ -95,9 +95,16 @@ extern "C" void* ConcatCppString(void* arg1, void* arg2) {
 	return arg1;
 }
 
-extern "C" void* ConvertCharToCppString(char* tokenNum ) {
+extern "C" void* ConvertCharToCppString(char* tokenNum) {
 	
 	return new string(tokenNum);
+}
+
+extern "C" void* SubstituteNCvarAsCppString(char* tokenVar) {
+	string *fanucVarString = new string("#");
+	*fanucVarString += to_string(MatchinFanucVariableToNC(tokenVar));
+
+	return fanucVarString;
 }
 
 extern "C" void PrintCppString(void* str) {
@@ -108,8 +115,3 @@ extern "C" void PrintCppString(void* str) {
 	cout << *x << endl;
 }
 
-extern "C" void PrintInt(int x) {
-	
-	cout << "Printing CppString in process. Please, wait..." << endl;
-	cout << x << endl;
-}

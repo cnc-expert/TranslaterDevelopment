@@ -1,9 +1,10 @@
-;Expression-blocks testing with BLT
+;Test 4: expression-blocks testing with BLT.
+
 ;SVERLENIE OTVERSTIY V CICLE
 
 ;SVERLO D18
 T1.1 M16
-;S1600 M3 -> 'S' doesn't processed
+S1600 M3
 
 ;----- Initial values -----
 ;Current angle
@@ -22,7 +23,7 @@ E50=0
   E41=(E35+E36*E50)*SIN(E30+E31*E50)
   G0 XE40 YE41
   Z3 M8
-  ;G1 Z-30 F0.1 -> 'F' doesn't processed
+  G1 Z-30 F0.1
   G0 Z100
   E50=E50+1
 ;(BLT,E50,5,METKA) -> this doesn't work
