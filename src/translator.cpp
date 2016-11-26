@@ -14,6 +14,7 @@ using namespace std;
 
 Block::Block() {
 	numberOfBlock = -1;
+	label = NULL;
 	type = TB_ORDINARY;
 }	
 
@@ -117,6 +118,7 @@ extern "C" void* AddLabelToDequeOfBlock(void* dequeObject, char* label) {
 
 	deque<Block*>* dequeTmp = (deque<Block*>*)dequeObject;
 	dequeTmp->front()->numberOfBlock = CounterOfBlocks;
+	dequeTmp->front()->label = label;
 	
 	// Add label name as comment.
 	string* tmpStr = new string(label);

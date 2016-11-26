@@ -11,7 +11,7 @@
 
 using namespace std;
 
-enum typeOfBlock {TB_EPP, TB_ORDINARY};
+enum typeOfBlock {TB_EPP, TB_ORDINARY, TB_UNINIT_EPP};
 
 extern int CounterOfBlocks; // counter of the temporary blocks' numbers
 extern int MaximalNumberOfBlock;
@@ -29,6 +29,7 @@ class Block {
 		string* translatedBlock;
 		int numberOfBlock;
 		enum typeOfBlock type;
+		char* label;
 
 	Block() ;
 };

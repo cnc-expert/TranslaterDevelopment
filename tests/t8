@@ -85,7 +85,7 @@ M0
 
 
 ;----- Here is labels are below of EPP call. -----
-N20 (DIS, "RASFREZEROVKA CENTR OTV")
+N30 (DIS, "RASFREZEROVKA CENTR OTV")
 G0 G29 G40 G90 G79 Z0
 G95
 ;(UAO,2)

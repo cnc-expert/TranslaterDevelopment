@@ -23,11 +23,11 @@ EppBlock::EppBlock() {
 static map<char*, int> MatchLabelAndVariable;
 
 // Mapping: LableTwo -> number of highest block in EPP pairs.
-static map<char*, int> MatchLabels;
+static map<char*, char*> MatchLabels;
 
 
 
-extern "C" void* CreateEPPBlock(char* labelOne,char*  labelTwo){
+extern "C" void* CreateEPPBlock(char* labelOne, char* labelTwo){
 	EppBlock* blockObject = new EppBlock();
 	blockObject->translatedBlock = new string("EppBlock");////delete
 
@@ -47,14 +47,14 @@ static void SetMinimalBlockNumber(EppBlock *b) {
 	if ( MatchLabels.find(b->labelTwo) == MatchLabels.end() ) {
 		/* If pair for labelTwo does not exist: */
 
-		MatchLabels[b->labelTwo] = LabledBlocksTable[b->labelOne];
+		MatchLabels[b->labelTwo] = b->labelOne;
 	}
 	else {
 		/* If pair for labelTwo exists -
 		   check if it might be greater than in current EppBlock 'b'. */
 
-		if (MatchLabels[b->labelTwo] > LabledBlocksTable[b->labelOne]) {
-			MatchLabels[b->labelTwo] = LabledBlocksTable[b->labelOne];
+		if (LabledBlocksTable[MatchLabels[b->labelTwo]] > LabledBlocksTable[b->labelOne]) {
+			MatchLabels[b->labelTwo] = b->labelOne;
 		}
 	}
 }
@@ -85,14 +85,56 @@ static deque<Block*>::iterator FindFrontTypedBlock(enum typeOfBlock type){
 	return programFanuc.end();
 }
 
+static void InitializeIntermediateLabels() {
+	
+		auto firstEppBlock = FindFrontTypedBlock(TB_UNINIT_EPP);
+		
+		while ( firstEppBlock != programFanuc.end() ) {
+			
+			EppBlock* tmpBlock = (EppBlock*)*firstEppBlock;
+			tmpBlock->type = TB_ORDINARY;
+			deque<Block*> tmpDeque;
+			
+			for ( auto currentBlock = FindLabeledBlock(tmpBlock->labelOne) + 1;
+				(*currentBlock)->numberOfBlock != LabledBlocksTable[tmpBlock->labelTwo];
+				currentBlock++ ) {
+					
+					if( (*currentBlock)->label != NULL && 
+							MatchLabelAndVariable.find((*currentBlock)->label) != MatchLabelAndVariable.end() ) {
+						
+						Block *b = new Block();				
+						b->translatedBlock = new string(string("#") +
+														  to_string(MatchLabelAndVariable[(*currentBlock)->label] ) +
+														  string("=") 
+														  + to_string(MatchLabelAndNumberOfBlock[(*currentBlock)->label] ) );
 
+						tmpDeque.push_front(b);
+						
+					}	
+						
+			}
+			
+			
+			while ( !tmpDeque.empty() ) {
+					
+					firstEppBlock = programFanuc.insert( firstEppBlock, tmpDeque.front() );
+					tmpDeque.pop_front();
+					
+			}
+			
+			firstEppBlock = FindFrontTypedBlock(TB_UNINIT_EPP);
+		}
+		
+}
 
 /* Substitue EPP block by three blocks:
    1) var with callback address,   2) GOTO block,   3) numbered block to return. */
 static void TranslateFirstEppBlock(int variableNumber, int blockNumberToGo) {
 	
 	auto firstEppBlock = FindFrontTypedBlock(TB_EPP);
-	(*firstEppBlock)->type = TB_ORDINARY;
+	(*firstEppBlock)->type = TB_UNINIT_EPP; //   uninitialized epp_block
+	
+	
 
 	int numberOfBlockAfterEpp = ++MaximalNumberOfBlock;
 	*(*firstEppBlock)->translatedBlock = "#" + to_string(variableNumber) + "=" + to_string(numberOfBlockAfterEpp);
@@ -107,6 +149,21 @@ static void TranslateFirstEppBlock(int variableNumber, int blockNumberToGo) {
 	
 }
 
+static void InitializeEppBlocks() {
+	for (auto currentLabel = MatchLabels.begin(); currentLabel != MatchLabels.end(); currentLabel++ ) {
+		auto firstLabel = FindLabeledBlock((*currentLabel).second);
+		firstLabel--;
+		
+		Block* NBlock = new Block();				
+		NBlock->translatedBlock =  new string(string("#") +
+		                                      to_string(MatchLabelAndVariable[(*currentLabel).first]) +
+											  string("=") 
+											  + to_string(MatchLabelAndNumberOfBlock[(*currentLabel).first]) );
+		
+		programFanuc.insert(firstLabel, NBlock);								  
+		
+	}	
+}
 
 
 /* Find first EPP block and process it.
@@ -116,7 +173,8 @@ extern "C" int ProcessEppBlock() {
 	auto firstEpp = FindFrontTypedBlock(TB_EPP);
 	if (firstEpp == programFanuc.end()) {
 		/* There is no unprocessed EPPs in programFanuc */
-
+		InitializeEppBlocks();
+		InitializeIntermediateLabels();
 		return 0;
 	}
 
@@ -172,4 +230,5 @@ extern "C" int ProcessEppBlock() {
 	
 	return 1;
 }
+
 
