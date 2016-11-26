@@ -111,3 +111,19 @@ M2
 	G0 Z100
 "CENEND"
 M2
+
+"L1"
+  G0 G90 Z3 M8
+  G1 Z-30 F0.1 
+  (DLY,0.5)
+  G0 Z100
+"L2" 
+  G91 X15
+"L3"
+   G91 X15
+"L4"
+   G91 X15
+
+  (EPP,L1,L2)
+  (EPP,L2,L3)
+  (EPP,L1,L4)

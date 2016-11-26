@@ -151,7 +151,12 @@ static void TranslateFirstEppBlock(int variableNumber, int blockNumberToGo) {
 
 static void InitializeEppBlocks() {
 	for (auto currentLabel = MatchLabels.begin(); currentLabel != MatchLabels.end(); currentLabel++ ) {
-		auto firstLabel = FindLabeledBlock((*currentLabel).second);
+		auto secondLabel = (*currentLabel).second;
+		while (MatchLabels.find(secondLabel) != MatchLabels.end() ) {
+			secondLabel = MatchLabels[secondLabel];
+		}
+		auto firstLabel = FindLabeledBlock(secondLabel);
+		
 		firstLabel--;
 		
 		Block* NBlock = new Block();				
