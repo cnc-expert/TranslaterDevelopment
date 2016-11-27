@@ -1,0 +1,4 @@
+bin/
+src/lex.yy.[hc]
+src/parser.tab.[hc]
+
