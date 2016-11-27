@@ -1,0 +1,53 @@
+;Test 9: RPT test.
+;FREZEROVKA FASKI
+
+;FREZA D20R10
+N10 G0 G29 G40 G79 G95 Z0
+G90
+(UAO,2)
+(URT,0)
+T1.1 M16
+S2600 M3 
+
+X100 Y-40
+Z10
+
+;----- RPT with CONSTANT number of repetions -----
+(RPT,10)
+  G91 Z-10
+  G1 G90 X-100 F0.2
+  G91 Z9
+  G90 X100
+  G91 Y-1
+  G90
+(ERP)
+
+;----- INPUT -----
+;DZ
+E30=0.4
+;-----------------
+;NUMBER OF PASSES
+E0=INT(10/E30)+1
+;DZ CORRECTED
+E30=-10/E0
+;DY
+E31=E30/TAN(60)
+;-----------------
+
+X100 Y-50
+Z-10
+
+;----- RPT with VARIABLE number of repetions -----
+(RPT,E0)
+  G1 X-100 F0.3
+  G0 G91 Z10
+  G90 X100
+  G91 Z-10
+  YE31 ZE30
+  G90
+(ERP)
+
+G79 Z0 M9
+G79 X0 Y0 M5
+M2
+

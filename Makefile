@@ -3,16 +3,19 @@ CC = gcc
 CPP = g++
 CFLAGS = -g -c
 CPPFLAGS = -g -c -std=c++11
+UNITS = lexer parser main translator fanuc_vars translate_epp
+objects = $(foreach unit, ${UNITS}, bin/${unit}.o)
 tmp := $(shell mkdir -p bin)
-
 
 
 all: bin/${OUTF}
 	$<
 
-bin/${OUTF}: bin/lexer.o bin/parser.o bin/main.o bin/translator.o bin/translate_epp.o bin/fanuc_vars.o
+# Build all the units into one.
+bin/${OUTF}: ${objects}
 	${CPP} -g $^ -o $@
 
+# All the C++ translation units building.
 bin/%.o: src/%.cpp
 	${CPP} ${CPPFLAGS} $^ -o $@
 
@@ -33,22 +36,9 @@ src/lex.yy.h  src/lex.yy.c: src/lexer.l src/parser.tab.h
 
 
 # Tests
-t1: bin/${OUTF}
-	bin/${OUTF} < tests/t1
-t2: bin/${OUTF}
-	bin/${OUTF} < tests/t2
-t3: bin/${OUTF}
-	bin/${OUTF} < tests/t3
-t4: bin/${OUTF}
-	bin/${OUTF} < tests/t4
-t5: bin/${OUTF}
-	bin/${OUTF} < tests/t5
-t6: bin/${OUTF}
-	bin/${OUTF} < tests/t6
-t7: bin/${OUTF}
-	bin/${OUTF} < tests/t7
-t8: bin/${OUTF}
-	bin/${OUTF} < tests/t8
+t1 t2 t3 t4 t5 t6 t7 t8 t9: bin/${OUTF}
+	bin/${OUTF} < tests/$@
+
 
 
 clean:
