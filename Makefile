@@ -1,63 +1,50 @@
-OUTF=nc2fanuc
+OUTF = nc2fanuc
+CC = gcc
+CPP = g++
+CFLAGS = -g -c
+CPPFLAGS = -g -c -std=c++11
+UNITS = lexer parser main translator fanuc_vars translate_epp
+
+objects = $(foreach unit, ${UNITS}, bin/${unit}.o)
+tmp := $(shell mkdir -p bin)
+
+
 
 all: bin/${OUTF}
-	bin/${OUTF}
+	$<
 
-# Tests
-t1: bin/${OUTF}
-	bin/${OUTF} < tests/t1
-t2: bin/${OUTF}
-	bin/${OUTF} < tests/t2
-t3: bin/${OUTF}
-	bin/${OUTF} < tests/t3
-t4: bin/${OUTF}
-	bin/${OUTF} < tests/t4
-t5: bin/${OUTF}
-	bin/${OUTF} < tests/t5
-t6: bin/${OUTF}
-	bin/${OUTF} < tests/t6
-t7: bin/${OUTF}
-	bin/${OUTF} < tests/t7
-t8: bin/${OUTF}
-	bin/${OUTF} < tests/t8
-t8_full: bin/${OUTF}
-	bin/${OUTF} < tests/t8_full
+# Build all the units into one.
+bin/${OUTF}: ${objects}
+	${CPP} -g $^ -o $@
 
-bin/${OUTF}: src/lex.yy.c src/parser.tab.c bin/lexer.o bin/parser.o bin/main.o bin/translator.o
-	g++ -g bin/*.o -o bin/${OUTF} 
+# All the C++ translation units building.
+bin/%.o: src/%.cpp
+	${CPP} ${CPPFLAGS} $^ -o $@
 
-bin/translator.o: src/translator.cpp bin/translate_epp.o bin/fanuc_vars.o
-	g++ -g -std=c++11 -c src/translator.cpp -o bin/translator.o
 
-bin/translate_epp.o: src/translate_epp.cpp bin
-	g++ -g -std=c++11 -c src/translate_epp.cpp -o bin/translate_epp.o
 
-bin/fanuc_vars.o: src/fanuc_vars.cpp bin
-	g++ -g -std=c++11 -c src/fanuc_vars.cpp -o bin/fanuc_vars.o
-
-bin/main.o: src/main.cpp bin
-	g++ -g -c src/main.cpp -o bin/main.o
-
-bin/parser.o: src/parser.tab.c bin
-	gcc -g -c src/parser.tab.c -o bin/parser.o
-
-bin/lexer.o: src/lex.yy.c bin
-	gcc -g -c src/lex.yy.c -o bin/lexer.o
-
-bin:
-	mkdir -p bin
-
-src/parser.tab.c: src/parser.y
-	bison src/*.y
+# Lexer and parser.
+bin/parser.o: src/parser.tab.c
+	${CC} ${CFLAGS} $^ -o $@
+bin/lexer.o: src/lex.yy.c
+	${CC} ${CFLAGS} $^ -o $@
+src/parser.tab.h  src/parser.tab.c: src/parser.y
+	bison $^
 	mv parser.tab.[hc] src/
-
-src/lex.yy.c: src/lexer.l
-	flex src/*.l
+src/lex.yy.h  src/lex.yy.c: src/lexer.l src/parser.tab.h
+	flex $<
 	mv lex.yy.[hc] src/
 
+
+
+# Tests
+t1 t2 t3 t4 t5 t6 t7 t8 t9: bin/${OUTF}
+	bin/${OUTF} < tests/$@
+
+
+
 clean:
-	rm -f bin/${OUTF}
-	rm -f bin/*.o
+	rm -fr bin
 	rm -f src/parser.tab.[hc]
 	rm -f src/lex.yy.[hc]
 

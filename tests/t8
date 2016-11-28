@@ -1,13 +1,13 @@
 ;Test 8: EPP advanced test.
 
-;----- Here is label 'DRSTR' used as labelOne in different pairs. -----
+;----- Subtest 1.1. Here is label 'DRSTR' used as labelOne in different pairs. -----
 N10 (DIS, "SVERLENIE OTVERSTIY")
 G0 G29 G40 G90 G79 Z0
 G95
 ;(UAO,2)
 ;(URT,0)
 ;SVERLO D5
-T2.2 M16
+T1.1 M16
 S1600 M3 
 
 X100 Y100
@@ -29,7 +29,7 @@ X-100 Y100
 X-100 Y-100
 (EPP,DRSTR,DRSHF)
 
-;----- Here is the middle label 'DREND' used as labelOne and as labelTwo. -----
+;----- Subtest 1.2. Here is the middle label 'DREND' used as labelOne and as labelTwo. -----
 X100 Y-100
 (EPP,DRSTR,DREND)
 (EPP,DREND,DRSHF)
@@ -40,14 +40,14 @@ M0
 
 
 
-;----- Here is label 'OBNKON' used as labelTwo in different pairs. -----
+;----- Subtest 2. Here is label 'OBNKON' used as labelTwo in different pairs. -----
 N20 (DIS, "RASFREZEROVKA OTV")
 G0 G29 G40 G90 G79 Z0
 G95
 ;(UAO,2)
 ;(URT,0)
 ;FREZA D4
-T1.1 M16
+T2.2 M16
 S1600 M3 
 
 G0 X100 Y100 M8
@@ -84,22 +84,75 @@ M0
 
 
 
-;----- Here is labels are below of EPP call. -----
+;----- Subtest 3. Here is labels are below of EPP call. -----
 N30 (DIS, "RASFREZEROVKA CENTR OTV")
 G0 G29 G40 G90 G79 Z0
 G95
 ;(UAO,2)
 ;(URT,0)
 ;FREZA D4
-T1.1 M16
+T3.3 M16
 S1600 M3 
-
 (EPP,CENBEG,CENEND)
+G79 Z0 M9
+G79 X0 Y0 M5
+M0
 
+
+;----- Subtest 4. By Fomenko: L1->L2, L2->L3, L1->L4. -----
+N40 (DIS, "RAZVERTKA 4 OTV")
+G0 G29 G40 G90 G79 Z0
+G95
+;(UAO,2)
+;(URT,0)
+;RAZVERTKA D12
+T4.4 M16
+S3180 M3 M8
+
+
+"L1"
+  ;FIRST HOLE
+  G0 X100 Y100
+  Z3
+  G1 Z-2 F0.1 
+  G0 Z100
+"L2"
+  ;THIRD HOLE
+  G0 X-100 Y-100
+  Z3
+  G1 Z-2 F0.1 
+  G0 Z100
+"L3"
+  ;FIRST AND THIRD HOLES AGAIN
+  ;FIRST HOLE
+  G0 X100 Y100
+  Z3
+  G1 Z-2 F0.1 
+  G0 Z100
+  ;THIRD HOLE
+  G0 X-100 Y-100
+  Z3
+  G1 Z-2 F0.1 
+  G0 Z100
+"L4"
+
+;FIRST HOLE ONLY
+(EPP,L1,L2)
+;SECOND HOLE ONLY
+(EPP,L2,L3)
+;EACH HOLE BY TWO TIMES
+(EPP,L1,L4)
 G79 Z0 M9
 G79 X0 Y0 M5
 M2
 
+
+
+;----- PROCEDURES -----
+
+
+
+;CENTRAL HOLE PROCESSING
 "CENBEG"
 	G0 X0 Y0
 	Z3
@@ -112,18 +165,3 @@ M2
 "CENEND"
 M2
 
-"L1"
-  G0 G90 Z3 M8
-  G1 Z-30 F0.1 
-  (DLY,0.5)
-  G0 Z100
-"L2" 
-  G91 X15
-"L3"
-   G91 X15
-"L4"
-   G91 X15
-
-  (EPP,L1,L2)
-  (EPP,L2,L3)
-  (EPP,L1,L4)
