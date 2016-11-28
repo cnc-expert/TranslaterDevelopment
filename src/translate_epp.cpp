@@ -29,7 +29,7 @@ static map<char*, char*> MatchLabels;
 
 extern "C" void* CreateEPPBlock(char* labelOne, char* labelTwo){
 	EppBlock* blockObject = new EppBlock();
-	blockObject->translatedBlock = new string("EppBlock");////delete
+	blockObject->translatedBlock = new string("EppBlock");
 
 	blockObject->labelOne = labelOne;
 	blockObject->labelTwo = labelTwo;

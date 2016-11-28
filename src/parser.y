@@ -44,7 +44,9 @@
 prog:
 	block_list PROG_EOF { 
 		while(ProcessEppBlock());
+		ProcessRptBlock();
 		PrintProgramDeque(); 
+		
 		return 0; 
 	}
 ;
@@ -169,9 +171,9 @@ tlc_body:
 |	DIS COMMA E {$$ = CreateDefinedDequeForBlockString("");}
 |	EPP COMMA LABL COMMA LABL { $$=CreateEPPBlock($3,$5);}
 |	UAO COMMA var_or_num { $$ = CreateDefinedDequeForBlockString("G54"); } /* TO-DO */
-|	URT COMMA var_or_num { $$=CreateURTBlock($3);}
-|	RPT COMMA var_or_num {}
-|	ERP {  }
+|	URT COMMA var_or_num { $$ = CreateURTBlock($3); }
+|	RPT COMMA var_or_num { $$ = CreateRPTDeque($3); }
+|	ERP { $$ = CreateERPDeque(); }
 |	DLY COMMA var_or_num {$$ = CreateDelayDeque($3);}
 |	UCG COMMA NUM COMMA word word COMMA word word {}
 |	MIR {$$ = CreateDefinedDequeForBlockString("G52.2");}

@@ -11,7 +11,7 @@
 
 using namespace std;
 
-enum typeOfBlock {TB_EPP, TB_ORDINARY, TB_UNINIT_EPP};
+enum typeOfBlock {TB_EPP, TB_ORDINARY, TB_UNINIT_EPP, TB_RPT, TB_ERP };
 
 extern int CounterOfBlocks; // counter of the temporary blocks' numbers
 extern int MaximalNumberOfBlock;
@@ -43,6 +43,12 @@ class EppBlock : public Block {
 	EppBlock();
 };
 
+class RptBlock : public Block {
+	public:
+		char* counter;
+		
+};
+
 
 extern deque<Block*> programFanuc;
 
@@ -57,6 +63,9 @@ extern "C"{
 #endif
 
 //void PrintInt(int x);
+void ProcessRptBlock();
+void* CreateERPDeque();
+void* CreateRPTDeque(char* counter);
 void PrintProgramDeque();
 void CreateProgramDeque(void* dequeObject);
 void* AddOPDIVtoBlocks(void* dequeObject);
