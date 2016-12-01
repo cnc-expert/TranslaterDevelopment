@@ -2,7 +2,6 @@
 %error-verbose
 
 %code {
-	#include <stdio.h>
 	#include "lex.yy.h"
 	#include "main.h"
 	#include "translator.h"
@@ -190,5 +189,6 @@ tlc_body:
 var_or_num:
 	E
 |	NUM
+|	/* Empty means zero */ { $$ = AddToSymbolTable("0"); }
 ;
 
