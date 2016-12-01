@@ -273,12 +273,15 @@ extern "C" void* AddGOTOBlock(char* label)
 
 extern "C" void* CreateURTBlock(char* value){
 	Block* blockObject = new Block();
-	blockObject->translatedBlock = new string("G68 X0 Y0 R");
+	blockObject->translatedBlock = new string();
 	if (value[0] == 'E')
 	{
-		*blockObject->translatedBlock += string("#") + to_string(MatchinFanucVariableToNC(value));
+		*blockObject->translatedBlock += "G68 X0 Y0 R#" +
+		                                 to_string(MatchinFanucVariableToNC(value));
+	} else if (0 == atoi(value)) {
+		*blockObject->translatedBlock += "G69";
 	} else {
-		*blockObject->translatedBlock += value;
+		*blockObject->translatedBlock += "G68 X0 Y0 R#" + string(value);
 	}
 
 	deque<Block*> *programFanuc = new deque<Block*>();
