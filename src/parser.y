@@ -2,7 +2,6 @@
 %error-verbose
 
 %code {
-	#include <stdio.h>
 	#include "lex.yy.h"
 	#include "main.h"
 	#include "translator.h"
@@ -167,28 +166,47 @@ tlc_block:
 ;
 
 tlc_body:
-	DIS COMMA MSG {$$=CreateDefinedDequeForComments($3); }
-|	DIS COMMA E {$$ = CreateDefinedDequeForBlockString("");}
-|	EPP COMMA LABL COMMA LABL { $$=CreateEPPBlock($3,$5);}
-|	UAO COMMA var_or_num { $$ = CreateDefinedDequeForBlockString("G54"); } /* TO-DO */
-|	URT COMMA var_or_num { $$ = CreateURTBlock($3); }
-|	RPT COMMA var_or_num { $$ = CreateRPTDeque($3); }
-|	ERP { $$ = CreateERPDeque(); }
-|	DLY COMMA var_or_num {$$ = CreateDelayDeque($3);}
-|	UCG COMMA NUM COMMA word word COMMA word word {}
-|	MIR {$$ = CreateDefinedDequeForBlockString("G52.2");}
-|	MIR COMMA {$$ = CreateDefinedDequeForBlockString("G52.2");}
-|	MIR COMMA axis {}
-|	MIR COMMA axis COMMA axis {}
-|	BNC COMMA LABL {}
-|	BGT COMMA var_or_num COMMA var_or_num COMMA LABL {}
-|	BGE COMMA var_or_num COMMA var_or_num COMMA LABL {}
-|	BLT COMMA var_or_num COMMA var_or_num COMMA LABL {}
-|	BLE COMMA var_or_num COMMA var_or_num COMMA LABL {}
+	DIS COMMA MSG
+		{$$=CreateDefinedDequeForComments($3); }
+|	DIS COMMA E
+		{$$ = CreateDefinedDequeForBlockString("");} /* TO-DO: show var translation, for example, E30 -> #100 */
+|	EPP COMMA LABL COMMA LABL
+		{ $$=CreateEPPBlock($3,$5);}
+|	UAO COMMA var_or_num
+		{ $$ = CreateDefinedDequeForBlockString("G54"); } /* TO-DO */
+|	URT COMMA var_or_num
+		{ $$ = CreateURTBlock($3); } /* TO-DO */
+|	RPT COMMA var_or_num
+		{ $$ = CreateRPTDeque($3); }
+|	ERP
+		{ $$ = CreateERPDeque(); }
+|	DLY COMMA var_or_num
+		{$$ = CreateDelayDeque($3);}
+|	UCG COMMA NUM COMMA word word COMMA word word
+		{ $$ = CreateDefinedDequeForBlockString(""); }
+|	MIR
+		{$$ = CreateDefinedDequeForBlockString("G52.2");}
+|	MIR COMMA
+		{$$ = CreateDefinedDequeForBlockString("G52.2");}
+|	MIR COMMA axis
+		{} /* TO-DO */
+|	MIR COMMA axis COMMA axis 
+		{} /* TO-DO */
+|	BNC COMMA LABL
+		{} /* TO-DO */
+|	BGT COMMA var_or_num COMMA var_or_num COMMA LABL
+		{} /* TO-DO */
+|	BGE COMMA var_or_num COMMA var_or_num COMMA LABL
+		{} /* TO-DO */
+|	BLT COMMA var_or_num COMMA var_or_num COMMA LABL
+		{} /* TO-DO */
+|	BLE COMMA var_or_num COMMA var_or_num COMMA LABL
+		{} /* TO-DO */
 ;
 
 var_or_num:
 	E
 |	NUM
+|	/* Empty means zero */ { $$ = "0"; }
 ;
 
