@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "translator.h"
 #include "parser.tab.h"
-#include "ThreeWordFunc.cpp"
+//#include "SimpleBlocks.cpp"
 
 using namespace std;
 
@@ -59,6 +59,21 @@ map <int, int> GCodeTable = {
 	{ 93, -1 },	{ 94, 94 },	{ 95, 95 },
 	{ 35, -1 }
 };
+
+
+
+string IndetifyVariableOrNumber(char* expression) {
+	
+	if (expression[0] == 'E')
+	{
+		return string("#") + to_string(MatchinFanucVariableToNC(expression));
+	}
+	else
+		return string(expression);
+	
+}
+
+// replace ...
 
 
 extern "C" void PrintProgramDeque() {
@@ -250,21 +265,21 @@ extern "C" void* TranslateWordWithVariable(int address, char* variable)
 
 
 
-extern "C" void* AddGOTOBlock(char* label)
-{
-	//BNC
-	Block* blockObject = new Block();
-
-	/*create*/
-	//dont work
-	deque<Block*> *programFanuc = new deque<Block*>();
-	blockObject->translatedBlock = new string("GOTO ");
-	++MaximalNumberOfBlock;
-	int numBlock = LabledBlocksTable[label] + MaximalNumberOfBlock;
+extern "C" void* ChooseCoordinateSystem(char* expression) {
 	
-	programFanuc->push_back(blockObject);
+	// UAO
+	
+	Block* blockObject = new Block();
+	blockObject->translatedBlock = new string("G");
+	
+	if (expression[0] == 'E') {
+		*blockObject->translatedBlock += string("[#") + to_string(MatchinFanucVariableToNC(expression)) + "+53]";
+	}
+	else
+		*blockObject->translatedBlock += to_string( atoi(expression) + 53 );
 
-	//cout << programFanuc->size() << endl;;
+	deque<Block*> *programFanuc = new deque<Block*>();	
+	programFanuc->push_back(blockObject);
 
 	return programFanuc;
 	
@@ -290,12 +305,8 @@ extern "C" void* CreateDelayDeque(char* blockStr) {
 	//cout << "CreateDefinedDequeForBlockString in process..." << endl;
 	Block* blockObject = new Block();
 	blockObject->translatedBlock = new string("G4 X");
-	if (blockStr[0] == 'E')
-	{
-		*blockObject->translatedBlock += string("#") + to_string(MatchinFanucVariableToNC(blockStr));
-	}
-	else
-		*blockObject->translatedBlock += blockStr;
+
+	*blockObject->translatedBlock += IndetifyVariableOrNumber(blockStr);
 
 	deque<Block*> *programFanuc = new deque<Block*>();
 

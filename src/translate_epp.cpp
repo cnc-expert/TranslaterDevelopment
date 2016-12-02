@@ -62,7 +62,7 @@ static void SetMinimalBlockNumber(EppBlock *b) {
 
 
 /* Find block by the label. */
-static deque<Block*>::iterator FindLabeledBlock(char* label){
+deque<Block*>::iterator FindLabeledBlock(char* label) {
 	int numBlock = LabledBlocksTable[label];
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
@@ -75,7 +75,7 @@ static deque<Block*>::iterator FindLabeledBlock(char* label){
 
 
 /* Find first occurrence block by it's type. */
-static deque<Block*>::iterator FindFrontTypedBlock(enum typeOfBlock type){
+deque<Block*>::iterator FindFrontTypedBlock(enum typeOfBlock type){
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
 		if( (*curBlock)->type == type ) {
