@@ -45,6 +45,8 @@ BGT { BEGIN(var_or_num_1); return BGT; }
 BGE { BEGIN(var_or_num_1); return BGE; }
 BLT { BEGIN(var_or_num_1); return BLT; }
 BLE { BEGIN(var_or_num_1); return BLE; }
+BNE { BEGIN(var_or_num_1); return BNE; }
+BEQ { BEGIN(var_or_num_1); return BEQ; }
 BNC { BEGIN(expect_labl); return BNC; }
 EPP { BEGIN(expect_labl); return EPP; }
 DIS { BEGIN(dis); return DIS;}

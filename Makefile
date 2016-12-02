@@ -3,7 +3,7 @@ CC = gcc
 CPP = g++
 CFLAGS = -g -c
 CPPFLAGS = -g -c -std=c++11
-UNITS = lexer parser main translator fanuc_vars translate_epp translate_rpt
+UNITS = lexer parser main translator fanuc_vars translate_epp translate_rpt translate_jumps simple_blocks
 
 objects = $(foreach unit, ${UNITS}, bin/${unit}.o)
 tmp := $(shell mkdir -p bin)
