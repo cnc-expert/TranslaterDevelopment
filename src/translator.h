@@ -79,6 +79,7 @@ void* CreateERPDeque();
 void* CreateRPTDeque(char* counter);
 void PrintProgramDeque();
 void CreateProgramDeque(void* dequeObject);
+void* AddIndentationToBlock(char* indentation, void *deque);
 void* AddOPDIVtoBlocks(void* dequeObject);
 void* EnumerateBlocks(void* listObject, char* currentNumberOfBlock);
 void* AddLabelToDequeOfBlock(void* listObject, char* label);

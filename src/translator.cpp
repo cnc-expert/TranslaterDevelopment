@@ -77,7 +77,7 @@ string IndetifyVariableOrNumber(char* expression) {
 
 
 extern "C" void PrintProgramDeque() {
-	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
+
 	while (!programFanuc.empty()) {
 		cout << endl << *programFanuc.front()->translatedBlock ;
 		programFanuc.pop_front();
@@ -88,14 +88,23 @@ extern "C" void PrintProgramDeque() {
 extern "C" void CreateProgramDeque(void* dequeObject) {
 	deque<Block*>* dequeTmp = (deque<Block*>*)dequeObject;
 
-	//cout <<"CreateProgramDeque "<< dequeTmp->size() << endl;
-
 	while (!dequeTmp->empty()) {
 		programFanuc.push_front(dequeTmp->front());
 		dequeTmp->pop_front();
 	}
-	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
+
 	delete dequeTmp;
+}
+
+extern "C" void* AddIndentationToBlock(char* indentation, void *deque_of_blocks) {
+	deque<Block*>* blocks = (deque<Block*>*) deque_of_blocks;
+
+	for (auto i = blocks->begin(); i != blocks->end(); i++) {
+
+		*(*i)->translatedBlock = indentation + *(*i)->translatedBlock;
+	}
+
+	return blocks;
 }
 
 extern "C" void* AddOPDIVtoBlocks(void* dequeObject) {
