@@ -65,12 +65,7 @@ extern "C" void ProcessRptBlock() {
 			blockTmp->translatedBlock = new string("#" + to_string(variableNumber) + "=");
 			char* counter = ( (RptBlock*)(*lastRptBlock) )->counter;
 			
-			if (counter[0] == 'E') { // for variable
-					*blockTmp->translatedBlock += string("#") + to_string(MatchinFanucVariableToNC(counter));
-			}
-			else { // for number
-					*blockTmp->translatedBlock += counter;
-			}
+			*blockTmp->translatedBlock += IndetifyVariableOrNumber(counter);
 						
 			auto ErpBlock = programFanuc.insert(lastRptBlock, blockTmp);
 			

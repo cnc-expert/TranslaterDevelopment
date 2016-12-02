@@ -30,7 +30,7 @@
 %token EOB PROG_EOF
 %token<comment> LABL COMM MSG
 %token COMMA
-%token BGT BGE BLT BLE BNC DLY URT UCG MIR EPP RPT ERP DIS UAO
+%token BNE BEQ BGT BGE BLT BLE BNC DLY URT UCG MIR EPP RPT ERP DIS UAO
 %token<tokenSingleLetterFunc> G M T F S N R I J K
 %token<tokenAxis> X Y Z
 %token OPEQUAL OPDIV OPMULT OPPLUS OPMINUS OPARENT CPARENT
@@ -44,6 +44,7 @@ prog:
 	block_list PROG_EOF { 
 		while(ProcessEppBlock());
 		ProcessRptBlock();
+		ProcessJumpBlock();
 		PrintProgramDeque(); 
 		
 		return 0; 
@@ -167,41 +168,45 @@ tlc_block:
 
 tlc_body:
 	DIS COMMA MSG
-		{$$=CreateDefinedDequeForComments($3); }
+		{ $$=CreateDefinedDequeForComments($3); }
 |	DIS COMMA E
-		{$$ = CreateDefinedDequeForBlockString("");} /* TO-DO: show var translation, for example, E30 -> #100 */
+		{ $$ = CreateDefinedDequeForBlockString(""); } /* TO-DO: show var translation, for example, E30 -> #100 */
 |	EPP COMMA LABL COMMA LABL
 		{ $$=CreateEPPBlock($3,$5);}
 |	UAO COMMA var_or_num
-		{ $$ = CreateDefinedDequeForBlockString("G54"); } /* TO-DO */
+		{ $$ = ChooseCoordinateSystem($3); }
 |	URT COMMA var_or_num
-		{ $$ = CreateURTBlock($3); } /* TO-DO */
+		{ $$ = CreateURTBlock($3); }
 |	RPT COMMA var_or_num
 		{ $$ = CreateRPTDeque($3); }
 |	ERP
 		{ $$ = CreateERPDeque(); }
 |	DLY COMMA var_or_num
-		{$$ = CreateDelayDeque($3);}
+		{ $$ = CreateDelayDeque($3); }
 |	UCG COMMA NUM COMMA word word COMMA word word
 		{ $$ = CreateDefinedDequeForBlockString(""); }
 |	MIR
-		{$$ = CreateDefinedDequeForBlockString("G52.2");}
+		{ $$ = CreateDefinedDequeForBlockString("G50.1"); }
 |	MIR COMMA
-		{$$ = CreateDefinedDequeForBlockString("G52.2");}
+		{ $$ = CreateDefinedDequeForBlockString("G50.1"); }
 |	MIR COMMA axis
 		{} /* TO-DO */
 |	MIR COMMA axis COMMA axis 
 		{} /* TO-DO */
 |	BNC COMMA LABL
-		{} /* TO-DO */
+		{ $$ = CreateBNCBlock($3); }
 |	BGT COMMA var_or_num COMMA var_or_num COMMA LABL
-		{} /* TO-DO */
+		{ $$ = CreateJumpBlock("GT", $3, $5, $7); }
 |	BGE COMMA var_or_num COMMA var_or_num COMMA LABL
-		{} /* TO-DO */
+		{ $$ = CreateJumpBlock("GE", $3, $5, $7); }
 |	BLT COMMA var_or_num COMMA var_or_num COMMA LABL
-		{} /* TO-DO */
+		{ $$ = CreateJumpBlock("LT", $3, $5, $7); }
 |	BLE COMMA var_or_num COMMA var_or_num COMMA LABL
-		{} /* TO-DO */
+		{ $$ = CreateJumpBlock("LE", $3, $5, $7); }
+|	BNE COMMA var_or_num COMMA var_or_num COMMA LABL
+		{ $$ = CreateJumpBlock("NE", $3, $5, $7); }
+|	BEQ COMMA var_or_num COMMA var_or_num COMMA LABL
+		{ $$ = CreateJumpBlock("EQ", $3, $5, $7); }
 ;
 
 var_or_num:

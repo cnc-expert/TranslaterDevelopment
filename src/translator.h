@@ -11,7 +11,7 @@
 
 using namespace std;
 
-enum typeOfBlock {TB_EPP, TB_ORDINARY, TB_UNINIT_EPP, TB_RPT, TB_ERP };
+enum typeOfBlock {TB_EPP, TB_ORDINARY, TB_UNINIT_EPP, TB_RPT, TB_ERP, TB_JUMP };
 
 extern int CounterOfBlocks; // counter of the temporary blocks' numbers
 extern int MaximalNumberOfBlock;
@@ -59,10 +59,21 @@ extern map <int, int> GCodeTable;
 
 int MatchinFanucVariableToNC(char* variableNC);
 
+deque<Block*>::iterator FindFrontTypedBlock(enum typeOfBlock type);
+
+deque<Block*>::iterator FindLabeledBlock(char* label);
+
+string IndetifyVariableOrNumber(char* expression);
+
+
+
 extern "C"{
 #endif
 
-//void PrintInt(int x);
+void* ChooseCoordinateSystem(char* expression);
+void* CreateJumpBlock(char* condition, char* arg1, char* arg2, char* label);
+void ProcessJumpBlock();
+void* CreateBNCBlock(char* label);
 void ProcessRptBlock();
 void* CreateERPDeque();
 void* CreateRPTDeque(char* counter);

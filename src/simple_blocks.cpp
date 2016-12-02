@@ -1,3 +1,4 @@
+#include "translator.h"
 #include "parser.tab.h"
 
 #include <iostream>
