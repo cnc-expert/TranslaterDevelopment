@@ -129,18 +129,22 @@ static void InitializeIntermediateLabels() {
 
 /* Substitue EPP block by three blocks:
    1) var with callback address,   2) GOTO block,   3) numbered block to return. */
-static void TranslateFirstEppBlock(int variableNumber, int blockNumberToGo) {
+static void TranslateFirstEppBlock(char *labelOne, char *labelTwo) {
+
+	int variableNumber = MatchLabelAndVariable[labelTwo];
+	int blockNumberToGo = MatchLabelAndNumberOfBlock[labelOne];
 	
 	auto firstEppBlock = FindFrontTypedBlock(TB_EPP);
 	(*firstEppBlock)->type = TB_UNINIT_EPP; //   uninitialized epp_block
 	
 	
-
 	int numberOfBlockAfterEpp = ++MaximalNumberOfBlock;
 	*(*firstEppBlock)->translatedBlock = "#" + to_string(variableNumber) + "=" + to_string(numberOfBlockAfterEpp);
 	
 	Block *b = new Block();				
-	b->translatedBlock = new string( string("GOTO ") + to_string(blockNumberToGo) );
+	b->translatedBlock = new string( string("GOTO ") +
+	                                 to_string(blockNumberToGo) +
+									 " (" + labelOne + " -> " + labelTwo + ")");
 	firstEppBlock = programFanuc.insert(firstEppBlock+1, b);
 	
 	b = new Block();				
@@ -194,8 +198,8 @@ extern "C" int ProcessEppBlock() {
 
 		Block* NBlock = new Block();
 		NBlock->translatedBlock = new string(string("N") +
-		                                     to_string(++MaximalNumberOfBlock) +
-		                                     " (" + curEppBlock->labelOne + ")");
+		                                     to_string(++MaximalNumberOfBlock) );
+		                                //   + " (" + curEppBlock->labelOne + ")");
 		
 		auto firstLabelBlock = FindLabeledBlock(curEppBlock->labelOne);
 		programFanuc.insert(firstLabelBlock, NBlock);
@@ -222,8 +226,8 @@ extern "C" int ProcessEppBlock() {
 		
 		Block* NBlock = new Block();				
 		NBlock->translatedBlock =  new string(string("N") +
-		                                      to_string(++MaximalNumberOfBlock) +
-		                                      " (" + curEppBlock->labelTwo + ")");
+		                                      to_string(++MaximalNumberOfBlock) );
+		                                 //   + " (" + curEppBlock->labelTwo + ")");
 		
 		auto secondLabelBlock = FindLabeledBlock(curEppBlock->labelTwo);
 		programFanuc.insert(secondLabelBlock, NBlock);
@@ -231,9 +235,8 @@ extern "C" int ProcessEppBlock() {
 		MatchLabelAndNumberOfBlock[curEppBlock->labelTwo] = MaximalNumberOfBlock;
 	}
 	
-	TranslateFirstEppBlock(MatchLabelAndVariable[curEppBlock->labelTwo], MatchLabelAndNumberOfBlock[curEppBlock->labelOne]);
+	TranslateFirstEppBlock(curEppBlock->labelOne, curEppBlock->labelTwo);
 	
 	return 1;
 }
-
 

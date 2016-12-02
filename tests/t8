@@ -158,7 +158,7 @@ M2
 	Z3
 	G1 Z0 F0.5
 	G41 X5
-	G3 G40 X5 Y0 Z-5 R5 K5  -> address 'K' doesn't work
+	;G3 G40 X5 Y0 Z-5 R5 K5 ; -> address 'K' doesn't work
 	G3 G40 X5 Y0 Z-5 R5
 	G1 X-5
 	G0 Z100

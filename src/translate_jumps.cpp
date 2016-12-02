@@ -3,62 +3,70 @@
 
 using namespace std;
 
+
+class JmpBlock : public Block {
+	public:
+		char* label_to_go;
+};
+
+
+
 extern "C" void ProcessJumpBlock() {
 	
 	auto JumpBlock = FindFrontTypedBlock(TB_JUMP);		
 		
-		while ( JumpBlock != programFanuc.end() ) {
-			
-			Block* JumpBlockObject = *JumpBlock;
-			
-			if ( MatchLabelAndNumberOfBlock.find( JumpBlockObject->label ) == MatchLabelAndNumberOfBlock.end() ) {
+	while ( JumpBlock != programFanuc.end() ) {
+		
+		JmpBlock* JumpBlockObject = (JmpBlock *) *JumpBlock;
+		
+		if ( MatchLabelAndNumberOfBlock.find( JumpBlockObject->label_to_go ) == MatchLabelAndNumberOfBlock.end() ) {
 
-				Block* NBlock = new Block();
-				NBlock->translatedBlock = new string(string("N") +
-													 to_string(++MaximalNumberOfBlock) +
-													 " (" + JumpBlockObject->label + ")");
-				
-				auto firstLabelBlock = FindLabeledBlock( JumpBlockObject->label );
-				programFanuc.insert(firstLabelBlock, NBlock);
-				
-				MatchLabelAndNumberOfBlock[ JumpBlockObject->label ] = MaximalNumberOfBlock;
-			}
+			Block* NBlock = new Block();
+			NBlock->translatedBlock = new string(string("N") +
+			                                     to_string(++MaximalNumberOfBlock) );
+			                                 //  + " (" + JumpBlockObject->label_to_go + ")");
+
+			auto firstLabelBlock = FindLabeledBlock( JumpBlockObject->label_to_go );
+			programFanuc.insert(firstLabelBlock, NBlock);
 			
-			*JumpBlockObject->translatedBlock += "GOTO" + to_string( MatchLabelAndNumberOfBlock[ JumpBlockObject->label ] );
-			
-			JumpBlockObject->type = TB_ORDINARY;
-			
-			JumpBlock = FindFrontTypedBlock(TB_JUMP);
-			
-		}	
+			MatchLabelAndNumberOfBlock[ JumpBlockObject->label_to_go ] = MaximalNumberOfBlock;
+		}
+		
+		*JumpBlockObject->translatedBlock += "GOTO" +
+		                                     to_string( MatchLabelAndNumberOfBlock[ JumpBlockObject->label_to_go ] ) +
+											 " (" + JumpBlockObject->label_to_go + ")";
+		JumpBlockObject->type = TB_ORDINARY;
+		
+		JumpBlock = FindFrontTypedBlock(TB_JUMP);
+	}	
 }
+
 
 extern "C" void* CreateBNCBlock(char* label) {
 	
-	Block* blockObject = new Block();
+	JmpBlock* blockObject = new JmpBlock();
 	blockObject->translatedBlock = new string("");
 
-	blockObject->label = label;
+	blockObject->label_to_go = label;
 	blockObject->type = TB_JUMP;
 
 	deque<Block*> *programFanuc = new deque<Block*>();
-
 	programFanuc->push_back(blockObject);
 
 	return programFanuc;
 }
 
+
 extern "C" void* CreateJumpBlock(char* condition, char* arg1, char* arg2, char* label) {
 	
-	Block* blockObject = new Block();
+	JmpBlock* blockObject = new JmpBlock();
 	blockObject->translatedBlock = 
 		new string("IF [" + IndetifyVariableOrNumber(arg1) + " " + condition + " " + IndetifyVariableOrNumber(arg2) + "] ");
 
-	blockObject->label = label;
+	blockObject->label_to_go = label;
 	blockObject->type = TB_JUMP;
 
 	deque<Block*> *programFanuc = new deque<Block*>();
-
 	programFanuc->push_back(blockObject);
 
 	return programFanuc;
