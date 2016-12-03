@@ -21,12 +21,14 @@ extern "C" void ProcessJumpBlock() {
 		
 		if ( MatchLabelAndNumberOfBlock.find( JumpBlockObject->label_to_go ) == MatchLabelAndNumberOfBlock.end() ) {
 
+			auto firstLabelBlock = FindLabeledBlock( JumpBlockObject->label_to_go );
+
 			Block* NBlock = new Block();
+			NBlock->indentation = (*firstLabelBlock)->indentation;
 			NBlock->translatedBlock = new string(string("N") +
 			                                     to_string(++MaximalNumberOfBlock) );
 			                                 //  + " (" + JumpBlockObject->label_to_go + ")");
 
-			auto firstLabelBlock = FindLabeledBlock( JumpBlockObject->label_to_go );
 			programFanuc.insert(firstLabelBlock, NBlock);
 			
 			MatchLabelAndNumberOfBlock[ JumpBlockObject->label_to_go ] = MaximalNumberOfBlock;

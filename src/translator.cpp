@@ -13,6 +13,7 @@ using namespace std;
 
 
 Block::Block() {
+	indentation = NULL;
 	numberOfBlock = -1;
 	label = NULL;
 	type = TB_ORDINARY;
@@ -64,23 +65,26 @@ map <int, int> GCodeTable = {
 
 string IndetifyVariableOrNumber(char* expression) {
 	
-	if (expression[0] == 'E')
-	{
+	if (expression[0] == 'E') {
 		return string("#") + to_string(MatchinFanucVariableToNC(expression));
 	}
-	else
+	else {
 		return string(expression);
+	}
 	
 }
-
-// replace ...
 
 
 extern "C" void PrintProgramDeque() {
 
 	while (!programFanuc.empty()) {
-		cout << endl << *programFanuc.front()->translatedBlock ;
+		Block *b = programFanuc.front();
+		if (b->indentation) {
+			cout << b->indentation;
+		}
+		cout << *b->translatedBlock << endl;
 		programFanuc.pop_front();
+		delete b;
 	}
 
 }
@@ -101,7 +105,7 @@ extern "C" void* AddIndentationToBlock(char* indentation, void *deque_of_blocks)
 
 	for (auto i = blocks->begin(); i != blocks->end(); i++) {
 
-		*(*i)->translatedBlock = indentation + *(*i)->translatedBlock;
+		(*i)->indentation = indentation;
 	}
 
 	return blocks;

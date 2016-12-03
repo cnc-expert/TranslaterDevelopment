@@ -26,6 +26,7 @@ extern int getUnusedFanucVariable();
 
 class Block {
 	public:
+		char *indentation;
 		string* translatedBlock;
 		int numberOfBlock;
 		enum typeOfBlock type;
@@ -69,7 +70,6 @@ string IndetifyVariableOrNumber(char* expression);
 
 extern "C"{
 #endif
-
 void* ChooseCoordinateSystem(char* expression);
 void* CreateJumpBlock(char* condition, char* arg1, char* arg2, char* label);
 void ProcessJumpBlock();
