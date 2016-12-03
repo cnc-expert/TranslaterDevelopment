@@ -13,6 +13,7 @@ using namespace std;
 
 
 Block::Block() {
+	indentation = NULL;
 	numberOfBlock = -1;
 	label = NULL;
 	type = TB_ORDINARY;
@@ -64,23 +65,26 @@ map <int, int> GCodeTable = {
 
 string IndetifyVariableOrNumber(char* expression) {
 	
-	if (expression[0] == 'E')
-	{
+	if (expression[0] == 'E') {
 		return string("#") + to_string(MatchinFanucVariableToNC(expression));
 	}
-	else
+	else {
 		return string(expression);
+	}
 	
 }
 
-// replace ...
-
 
 extern "C" void PrintProgramDeque() {
-	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
+
 	while (!programFanuc.empty()) {
-		cout << endl << *programFanuc.front()->translatedBlock ;
+		Block *b = programFanuc.front();
+		if (b->indentation) {
+			cout << b->indentation;
+		}
+		cout << *b->translatedBlock << endl;
 		programFanuc.pop_front();
+		delete b;
 	}
 
 }
@@ -88,14 +92,23 @@ extern "C" void PrintProgramDeque() {
 extern "C" void CreateProgramDeque(void* dequeObject) {
 	deque<Block*>* dequeTmp = (deque<Block*>*)dequeObject;
 
-	//cout <<"CreateProgramDeque "<< dequeTmp->size() << endl;
-
 	while (!dequeTmp->empty()) {
 		programFanuc.push_front(dequeTmp->front());
 		dequeTmp->pop_front();
 	}
-	//cout <<"PrintProgramDeque "<< programFanuc.size() << endl;
+
 	delete dequeTmp;
+}
+
+extern "C" void* AddIndentationToBlock(char* indentation, void *deque_of_blocks) {
+	deque<Block*>* blocks = (deque<Block*>*) deque_of_blocks;
+
+	for (auto i = blocks->begin(); i != blocks->end(); i++) {
+
+		(*i)->indentation = indentation;
+	}
+
+	return blocks;
 }
 
 extern "C" void* AddOPDIVtoBlocks(void* dequeObject) {

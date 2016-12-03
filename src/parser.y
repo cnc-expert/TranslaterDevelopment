@@ -20,7 +20,7 @@
 }
 
 %type<cppString> factor signed_item item expr expr_first_item_with_sign expr_block word iso_block 
-%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block
+%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block indented_block
 %type<tokenCodeMathFunc> func func2 
 %type<numberOrVariable> var_or_num
 %type<tokenSingleLetterFunc> addr
@@ -28,7 +28,7 @@
 
 %token<numberOrVariable> NUM E
 %token EOB PROG_EOF
-%token<comment> LABL COMM MSG
+%token<comment> LABL COMM MSG INDENT
 %token COMMA
 %token BNE BEQ BGT BGE BLT BLE BNC DLY URT UCG MIR EPP RPT ERP DIS UAO
 %token<tokenSingleLetterFunc> G M T F S N R I J K
@@ -52,8 +52,13 @@ prog:
 ;
 
 block_list:
-	block EOB block_list { CreateProgramDeque($1); }
-|   block{ CreateProgramDeque($1); }
+	indented_block EOB block_list { CreateProgramDeque($1); }
+|   indented_block { CreateProgramDeque($1); }
+;
+
+indented_block:
+	INDENT block { $$ = AddIndentationToBlock($1, $2); }
+|	block
 ;
 
 block:
