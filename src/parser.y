@@ -17,9 +17,12 @@
 	int tokenCodeMathFunc;
 	int tokenSingleLetterFunc;
 	int tokenAxis;
+	void* classBlock;
+	
 }
 
-%type<cppString> factor signed_item item expr expr_first_item_with_sign expr_block word iso_block 
+%type<classBlock> word iso_block 
+%type<cppString> factor signed_item item expr expr_first_item_with_sign expr_block 
 %type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block indented_block
 %type<tokenCodeMathFunc> func func2 
 %type<numberOrVariable> var_or_num
@@ -31,7 +34,7 @@
 %token<comment> LABL COMM MSG INDENT
 %token COMMA
 %token BNE BEQ BGT BGE BLT BLE BNC DLY URT UCG MIR EPP RPT ERP DIS UAO
-%token<tokenSingleLetterFunc> G M T F S N R I J K
+%token<tokenSingleLetterFunc> G M T F S N R I J K b r
 %token<tokenAxis> X Y Z
 %token OPEQUAL OPDIV OPMULT OPPLUS OPMINUS OPARENT CPARENT
 %token<tokenCodeMathFunc> SIN COS TAN ARS ARC ART INT MOD SQR ABS
@@ -45,6 +48,8 @@ prog:
 		while(ProcessEppBlock());
 		ProcessRptBlock();
 		ProcessJumpBlock();
+		ProcessChamferBlock();
+		ProcessG40Block();
 		PrintProgramDeque(); 
 		
 		return 0; 
@@ -83,26 +88,28 @@ numberd_block:
 
 core_block:
 	{ $$ = CreateDefinedDequeForBlockString(""); } /* for empty block */
-|	iso_block {$$ = CreateDequeForBlockString($1); /*PrintCppString($1);*/}
+|	iso_block {$$ = CreateDequeForBlock($1); /*PrintCppString($1);*/}
 |	expr_block {$$ = CreateDequeForBlockString($1);}
 |	tlc_block
 ;
 
 iso_block:
 	word
-|	word iso_block {$$ = ConcatCppString($1, $2);}
+|	word iso_block {$$ = ConcatWords($1, $2);}
 ;
 
 word:
-	addr NUM { $$ = TranslateWordWithNumber($1, "", $2); }
+	addr { $$ = TranslateWordWithNumber($1, "", "0"); }
+|	addr NUM { $$ = TranslateWordWithNumber($1, "", $2); }
 |	addr OPPLUS NUM { $$ = TranslateWordWithNumber($1, "+", $3); }
 |	addr OPMINUS NUM { $$ = TranslateWordWithNumber($1, "-", $3); }
 |	addr E { $$ = TranslateWordWithVariable($1, $2); }
+
 ;
 
 addr:
 	axis { $$ = $1; } | I | J | K | R | S | F 
-|	T | G | M
+|	T | G | M | r | b
 ;
 
 axis:
@@ -175,7 +182,7 @@ tlc_body:
 	DIS COMMA MSG
 		{ $$=CreateDefinedDequeForComments($3); }
 |	DIS COMMA E
-		{ $$ = CreateDefinedDequeForBlockString(""); } /* TO-DO: show var translation, for example, E30 -> #100 */
+		{ $$ = CreateDISWithVarBlock($3); } 
 |	EPP COMMA LABL COMMA LABL
 		{ $$=CreateEPPBlock($3,$5);}
 |	UAO COMMA var_or_num
@@ -195,9 +202,9 @@ tlc_body:
 |	MIR COMMA
 		{ $$ = CreateDefinedDequeForBlockString("G50.1"); }
 |	MIR COMMA axis
-		{} /* TO-DO */
+		{$$ = CreateMIRBlock($3);}
 |	MIR COMMA axis COMMA axis 
-		{} /* TO-DO */
+		{$$ = CreateDefinedDequeForBlockString("G51.1 X0 Y0");} 
 |	BNC COMMA LABL
 		{ $$ = CreateBNCBlock($3); }
 |	BGT COMMA var_or_num COMMA var_or_num COMMA LABL

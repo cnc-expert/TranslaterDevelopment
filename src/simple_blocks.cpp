@@ -87,12 +87,13 @@ extern "C" void* PutExpressionInBrackets(void* expression) {
 	return (void*)x;
 }
 
-extern "C" void* ConcatCppString(void* arg1, void* arg2) {
+extern "C" void* ConcatWords(void* arg1, void* arg2) {
 	
 	// pointers correction
+	if(((Block*)arg2)->type==TB_G40) ((Block*)arg1)->type=TB_G40;
+	*((Block*)arg1)->translatedBlock+= string(" ") + *((Block*)arg2)->translatedBlock;
 	
-	*(string*)arg1 = *(string*)arg1 + " " + *(string*)arg2;
-	delete (string*)arg2;
+	delete (Block*)arg2;
 	return arg1;
 }
 

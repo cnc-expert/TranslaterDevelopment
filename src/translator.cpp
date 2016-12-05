@@ -17,7 +17,10 @@ Block::Block() {
 	numberOfBlock = -1;
 	label = NULL;
 	type = TB_ORDINARY;
-}	
+}
+Block::~Block(){
+	delete translatedBlock;
+}
 
 
 // Counter of the temporary blocks' numbers.
@@ -74,6 +77,21 @@ string IndetifyVariableOrNumber(char* expression) {
 	
 }
 
+extern "C" void ProcessG40Block(){
+	
+	auto blockIter = FindFrontTypedBlock(TB_G40);
+		
+	while ( blockIter != programFanuc.end() ) {
+		Block* blockObject = new Block();
+		blockObject->indentation = (*blockIter)->indentation;
+		blockObject->translatedBlock = new string("G40");
+		(*blockIter)->type=TB_ORDINARY;
+		programFanuc.insert(blockIter+1, blockObject);
+		blockIter = FindFrontTypedBlock(TB_G40);
+		
+	}
+}
+
 
 extern "C" void PrintProgramDeque() {
 
@@ -87,6 +105,48 @@ extern "C" void PrintProgramDeque() {
 		delete b;
 	}
 
+}
+extern "C" void ProcessChamferBlock(){
+	auto chamferBlockIter = FindFrontTypedBlock(TB_CHAMFER);
+		
+	while ( chamferBlockIter != programFanuc.end() ) {
+		string str = *(*chamferBlockIter)->translatedBlock;
+		*(*(chamferBlockIter-1))->translatedBlock += string(" ") +str;
+		delete (*chamferBlockIter);
+		programFanuc.erase(chamferBlockIter);
+		chamferBlockIter = FindFrontTypedBlock(TB_CHAMFER);
+		
+	}
+	
+}
+
+extern "C"  void* CreateDISWithVarBlock(char* variable){
+	Block* blockObject = new Block();
+	blockObject->translatedBlock = new string(string("(") +variable+" -> " + IndetifyVariableOrNumber(variable)+")");
+	
+	
+	deque<Block*> *programFanuc = new deque<Block*>();	
+	programFanuc->push_back(blockObject);
+
+	return programFanuc;
+}
+
+
+extern "C" void* CreateMIRBlock(int axis){
+		
+	Block* blockObject = new Block();
+	blockObject->translatedBlock = new string("G51.1 ");
+	
+	switch(axis){
+		case X: 
+			*blockObject->translatedBlock+="X0";break;
+		case Y: 
+			*blockObject->translatedBlock+="Y0";break;
+	}
+	deque<Block*> *programFanuc = new deque<Block*>();	
+	programFanuc->push_back(blockObject);
+
+	return programFanuc;
 }
 
 extern "C" void CreateProgramDeque(void* dequeObject) {
@@ -161,6 +221,14 @@ extern "C" void* AddLabelToDequeOfBlock(void* dequeObject, char* label) {
 
 }
 
+extern "C" void* CreateDequeForBlock(void* block) {
+
+	deque<Block*> *blocks = new deque<Block*>();
+
+	blocks->push_back((Block*)block);
+
+	return blocks;
+}
 
 
 extern "C" void* CreateDequeForBlockString(void* blockStr) {
@@ -220,13 +288,20 @@ bool ValidateExpressionAboutDot(string expressionStr) { // validation
 
 extern "C" void* TranslateWordWithNumber(int address, const char* sign, const char* number) {
 
+
 	string* resultWord = new string("");
 	string expressionBeforeDot;
 	string expressionAfterDot;
 	bool resultOfValidationTFunction;
-
+	Block* blockObject = new Block();
+	
 	switch (address) {
-		case G:	*resultWord = "G" + to_string(GCodeTable[atoi(number)]);	break;
+		case G:	{
+			if(atoi(number) == 40){
+				blockObject->type=TB_G40;
+			}
+			else *resultWord = "G" + to_string(GCodeTable[atoi(number)]);
+		}break;
 		case M:	*resultWord = "M" + string(number);	break;
 		case T:
 			resultOfValidationTFunction = ValidateExpressionAboutDot(string(number));
@@ -250,10 +325,20 @@ extern "C" void* TranslateWordWithNumber(int address, const char* sign, const ch
 		case X:	*resultWord = "X" + string(sign) + string(number);	break;
 		case Y:	*resultWord = "Y" + string(sign) + string(number);	break;
 		case Z:	*resultWord = "Z" + string(sign) + string(number);	break;
+		case r: {
+			blockObject->type=TB_CHAMFER;
+			*resultWord= "R" + string(sign) + string(number);
+		}	break;
+		case b:{
+			blockObject->type=TB_CHAMFER;
+			*resultWord= "C" + string(sign) + string(number);
+		}	break;
 		default: *resultWord = to_string(address) + string(sign) + string(number);	break;
 	}
+	
+	blockObject->translatedBlock = resultWord;
 
-	return (void*)resultWord;
+	return (void*)blockObject;
 }
 
 extern "C" void* TranslateExpressionBlock(char* variableNC, void* expression) {

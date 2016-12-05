@@ -164,6 +164,26 @@ I {
 	return I;
 }
 
+J {
+	yylval.tokenSingleLetterFunc = J;
+	return J;
+}
+
+K {
+	yylval.tokenSingleLetterFunc = K;
+	return K;
+}
+
+r {
+	yylval.tokenSingleLetterFunc = r;
+	return r;
+}
+
+b {
+	yylval.tokenSingleLetterFunc = b;
+	return b;
+}
+
 	/* Variable token */
 <INITIAL,dis,var_or_num_1,var_or_num_2>E{uns_int} {
 	switch (YYSTATE) {
