@@ -2,7 +2,6 @@
 %error-verbose
 
 %code {
-	#include <stdio.h>
 	#include "lex.yy.h"
 	#include "main.h"
 	#include "translator.h"
@@ -21,7 +20,7 @@
 }
 
 %type<cppString> factor signed_item item expr expr_first_item_with_sign expr_block word iso_block 
-%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block
+%type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block indented_block
 %type<tokenCodeMathFunc> func func2 
 %type<numberOrVariable> var_or_num
 %type<tokenSingleLetterFunc> addr
@@ -29,7 +28,7 @@
 
 %token<numberOrVariable> NUM E
 %token EOB PROG_EOF
-%token<comment> LABL COMM MSG
+%token<comment> LABL COMM MSG INDENT
 %token COMMA
 %token BNE BEQ BGT BGE BLT BLE BNC DLY URT UCG MIR EPP RPT ERP DIS UAO
 %token<tokenSingleLetterFunc> G M T F S N R I J K
@@ -53,8 +52,13 @@ prog:
 ;
 
 block_list:
-	block EOB block_list { CreateProgramDeque($1); }
-|   block{ CreateProgramDeque($1); }
+	indented_block EOB block_list { CreateProgramDeque($1); }
+|   indented_block { CreateProgramDeque($1); }
+;
+
+indented_block:
+	INDENT block { $$ = AddIndentationToBlock($1, $2); }
+|	block
 ;
 
 block:
@@ -168,30 +172,51 @@ tlc_block:
 ;
 
 tlc_body:
-	DIS COMMA MSG {$$=CreateDefinedDequeForComments($3); }
-|	DIS COMMA E {$$ = CreateDefinedDequeForBlockString("");}
-|	EPP COMMA LABL COMMA LABL { $$=CreateEPPBlock($3,$5);}
-|	UAO COMMA var_or_num { $$ = ChooseCoordinateSystem($3); }
-|	URT COMMA var_or_num { $$ = CreateURTBlock($3); }
-|	RPT COMMA var_or_num { $$ = CreateRPTDeque($3); }
-|	ERP { $$ = CreateERPDeque(); }
-|	DLY COMMA var_or_num {$$ = CreateDelayDeque($3);}
-|	UCG COMMA NUM COMMA word word COMMA word word { $$ = CreateDefinedDequeForBlockString(""); }
-|	MIR {$$ = CreateDefinedDequeForBlockString("G52.2");}
-|	MIR COMMA {$$ = CreateDefinedDequeForBlockString("G52.2");}
-|	MIR COMMA axis {}
-|	MIR COMMA axis COMMA axis {}
-|	BNC COMMA LABL { $$ = CreateBNCBlock($3); }
-|	BGT COMMA var_or_num COMMA var_or_num COMMA LABL { $$ = CreateJumpBlock("GT", $3, $5, $7); }
-|	BGE COMMA var_or_num COMMA var_or_num COMMA LABL { $$ = CreateJumpBlock("GE", $3, $5, $7); }
-|	BLT COMMA var_or_num COMMA var_or_num COMMA LABL { $$ = CreateJumpBlock("LT", $3, $5, $7); }
-|	BLE COMMA var_or_num COMMA var_or_num COMMA LABL { $$ = CreateJumpBlock("LE", $3, $5, $7); }
-|	BNE COMMA var_or_num COMMA var_or_num COMMA LABL { $$ = CreateJumpBlock("NE", $3, $5, $7); }
-|	BEQ COMMA var_or_num COMMA var_or_num COMMA LABL { $$ = CreateJumpBlock("EQ", $3, $5, $7); }
+	DIS COMMA MSG
+		{ $$=CreateDefinedDequeForComments($3); }
+|	DIS COMMA E
+		{ $$ = CreateDefinedDequeForBlockString(""); } /* TO-DO: show var translation, for example, E30 -> #100 */
+|	EPP COMMA LABL COMMA LABL
+		{ $$=CreateEPPBlock($3,$5);}
+|	UAO COMMA var_or_num
+		{ $$ = ChooseCoordinateSystem($3); }
+|	URT COMMA var_or_num
+		{ $$ = CreateURTBlock($3); }
+|	RPT COMMA var_or_num
+		{ $$ = CreateRPTDeque($3); }
+|	ERP
+		{ $$ = CreateERPDeque(); }
+|	DLY COMMA var_or_num
+		{ $$ = CreateDelayDeque($3); }
+|	UCG COMMA NUM COMMA word word COMMA word word
+		{ $$ = CreateDefinedDequeForBlockString(""); }
+|	MIR
+		{ $$ = CreateDefinedDequeForBlockString("G50.1"); }
+|	MIR COMMA
+		{ $$ = CreateDefinedDequeForBlockString("G50.1"); }
+|	MIR COMMA axis
+		{} /* TO-DO */
+|	MIR COMMA axis COMMA axis 
+		{} /* TO-DO */
+|	BNC COMMA LABL
+		{ $$ = CreateBNCBlock($3); }
+|	BGT COMMA var_or_num COMMA var_or_num COMMA LABL
+		{ $$ = CreateJumpBlock("GT", $3, $5, $7); }
+|	BGE COMMA var_or_num COMMA var_or_num COMMA LABL
+		{ $$ = CreateJumpBlock("GE", $3, $5, $7); }
+|	BLT COMMA var_or_num COMMA var_or_num COMMA LABL
+		{ $$ = CreateJumpBlock("LT", $3, $5, $7); }
+|	BLE COMMA var_or_num COMMA var_or_num COMMA LABL
+		{ $$ = CreateJumpBlock("LE", $3, $5, $7); }
+|	BNE COMMA var_or_num COMMA var_or_num COMMA LABL
+		{ $$ = CreateJumpBlock("NE", $3, $5, $7); }
+|	BEQ COMMA var_or_num COMMA var_or_num COMMA LABL
+		{ $$ = CreateJumpBlock("EQ", $3, $5, $7); }
 ;
 
 var_or_num:
 	E
 |	NUM
+|	/* Empty means zero */ { $$ = "0"; }
 ;
 

@@ -74,8 +74,16 @@ ERP { return ERP; }
 	return EOB;
 }
 
-	/* Space token */
-[ \t]+ { }
+
+	/* Indentations */
+^[ \t]+ {
+	yylval.comment = AddToSymbolTable(yytext);
+	return INDENT;
+}
+
+	/* Other whitespaces */
+[ \t]+ { /* Ignore. */ }
+
 
 	/* Identification of lable terminals */
 <*>\" {

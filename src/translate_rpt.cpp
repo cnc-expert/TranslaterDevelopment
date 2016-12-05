@@ -51,40 +51,40 @@ extern "C" void* CreateRPTDeque(char* counter) {
 
 extern "C" void ProcessRptBlock() {
 	
-	auto lastRptBlock = FindLastTypedBlock(TB_RPT);
+	auto lastRptBlockIter = FindLastTypedBlock(TB_RPT);
 		
-		while ( lastRptBlock != programFanuc.end() ) {
-			
-			int numberOfBlock = ++MaximalNumberOfBlock;
-			int variableNumber = getUnusedFanucVariable();
-			
-			(*lastRptBlock)->type = TB_ORDINARY;
-			*(*lastRptBlock)->translatedBlock = "N" + to_string(numberOfBlock);
-			
-			Block *blockTmp = new Block();
-			blockTmp->translatedBlock = new string("#" + to_string(variableNumber) + "=");
-			char* counter = ( (RptBlock*)(*lastRptBlock) )->counter;
-			
-			*blockTmp->translatedBlock += IndetifyVariableOrNumber(counter);
-						
-			auto ErpBlock = programFanuc.insert(lastRptBlock, blockTmp);
-			
-			while ( (*ErpBlock)->type != TB_ERP /*&& ErpBlock != programFanuc.end()*/ ) // possible error
-				ErpBlock ++;
-			
-			*(*ErpBlock)->translatedBlock = "IF [#" + to_string(variableNumber) + " GT 0] GOTO" + to_string(numberOfBlock);
-			(*ErpBlock)->type = TB_ORDINARY;
-			
-			Block *decrementBlock = new Block();
-			decrementBlock->translatedBlock = 
-				new string( "#" + to_string(variableNumber) + "=#" + to_string(variableNumber) + "-1" );
-			
-			programFanuc.insert(ErpBlock, decrementBlock);
-			
-			lastRptBlock = FindLastTypedBlock(TB_RPT);
-			
-			
-		}
+	while ( lastRptBlockIter != programFanuc.end() ) {
 		
+		int numberOfBlock = ++MaximalNumberOfBlock;
+		int variableNumber = getUnusedFanucVariable();
+		
+		RptBlock *lastRptBlock = (RptBlock*)*lastRptBlockIter;
+		lastRptBlock->type = TB_ORDINARY;
+		*lastRptBlock->translatedBlock = "N" + to_string(numberOfBlock);
+		
+		Block *counterInitBlock = new Block();
+		counterInitBlock->indentation = lastRptBlock->indentation;
+		counterInitBlock->translatedBlock = new string("#" + to_string(variableNumber) + "=");
+		*counterInitBlock->translatedBlock += IndetifyVariableOrNumber(lastRptBlock->counter);
+					
+		auto ErpBlockIter = programFanuc.insert(lastRptBlockIter, counterInitBlock);
+
+		while ( (*ErpBlockIter)->type != TB_ERP /*&& ErpBlockIter != programFanuc.end()*/ ) // possible error
+			ErpBlockIter ++;
+
+		(*ErpBlockIter)->type = TB_ORDINARY;
+		*(*ErpBlockIter)->translatedBlock = "IF [#" + to_string(variableNumber) + " GT 0] GOTO" + to_string(numberOfBlock);
+		
+		Block *decrementBlock = new Block();
+		decrementBlock->indentation = (*(ErpBlockIter-1))->indentation;
+		decrementBlock->translatedBlock = new string( "#" + to_string(variableNumber) + "=" +
+													  "#" + to_string(variableNumber) + "-1" );
+		
+		programFanuc.insert(ErpBlockIter, decrementBlock);
+		
+		lastRptBlockIter = FindLastTypedBlock(TB_RPT);
+		
+	}
+	
 }
 

@@ -22,7 +22,7 @@ EppBlock::EppBlock() {
 // Mapping: Label -> fanuc variable for callback.
 static map<char*, int> MatchLabelAndVariable;
 
-// Mapping: LableTwo -> number of highest block in EPP pairs.
+// Mapping: labelTwo -> labelOne in EPP pairs.
 static map<char*, char*> MatchLabels;
 
 
@@ -42,6 +42,7 @@ extern "C" void* CreateEPPBlock(char* labelOne, char* labelTwo){
 }
 
 
+/* Setting up 'MatchLabels': for any label 'labelTwo' find the highest 'labelOne'. */
 static void SetMinimalBlockNumber(EppBlock *b) {
 
 	if ( MatchLabels.find(b->labelTwo) == MatchLabels.end() ) {
@@ -74,7 +75,7 @@ deque<Block*>::iterator FindLabeledBlock(char* label) {
 
 
 
-/* Find first occurrence block by it's type. */
+/* Find first block by it's type. */
 deque<Block*>::iterator FindFrontTypedBlock(enum typeOfBlock type){
 	for(auto curBlock = programFanuc.begin(); curBlock!= programFanuc.end(); curBlock++ ){
 
@@ -85,87 +86,103 @@ deque<Block*>::iterator FindFrontTypedBlock(enum typeOfBlock type){
 	return programFanuc.end();
 }
 
-static void InitializeIntermediateLabels() {
-	
-		auto firstEppBlock = FindFrontTypedBlock(TB_UNINIT_EPP);
-		
-		while ( firstEppBlock != programFanuc.end() ) {
-			
-			EppBlock* tmpBlock = (EppBlock*)*firstEppBlock;
-			tmpBlock->type = TB_ORDINARY;
-			deque<Block*> tmpDeque;
-			
-			for ( auto currentBlock = FindLabeledBlock(tmpBlock->labelOne) + 1;
-				(*currentBlock)->numberOfBlock != LabledBlocksTable[tmpBlock->labelTwo];
-				currentBlock++ ) {
-					
-					if( (*currentBlock)->label != NULL && 
-							MatchLabelAndVariable.find((*currentBlock)->label) != MatchLabelAndVariable.end() ) {
-						
-						Block *b = new Block();				
-						b->translatedBlock = new string(string("#") +
-														  to_string(MatchLabelAndVariable[(*currentBlock)->label] ) +
-														  string("=") 
-														  + to_string(MatchLabelAndNumberOfBlock[(*currentBlock)->label] ) );
 
-						tmpDeque.push_front(b);
-						
-					}	
-						
-			}
+/* Initialize of callback variable for labels between 'labelOne' and 'labelTwo'.
+   To prevent unexpected jumpings while going from 'labelOne' to 'labelTwo'. */
+static void InitializeIntermediateLabels() {
+
+	auto firstEppBlockIter = FindFrontTypedBlock(TB_UNINIT_EPP);
+	
+	while ( firstEppBlockIter != programFanuc.end() ) {
+		
+		EppBlock* firstEppBlock = (EppBlock*)*firstEppBlockIter;
+		firstEppBlock->type = TB_ORDINARY;
+		deque<Block*> tmpDeque;
+		
+		for ( auto intermediateBlockIter = FindLabeledBlock(firstEppBlock->labelOne) + 1;
+		      (*intermediateBlockIter)->numberOfBlock != LabledBlocksTable[firstEppBlock->labelTwo];
+		      intermediateBlockIter++ ) {
 			
+			if( (*intermediateBlockIter)->label != NULL && 
+					MatchLabelAndVariable.find((*intermediateBlockIter)->label) != MatchLabelAndVariable.end() ) {
+				
+				Block *b = new Block();
+				b->indentation = firstEppBlock->indentation;
+				b->translatedBlock = new string(string("#") +
+				                                to_string(MatchLabelAndVariable[(*intermediateBlockIter)->label] ) +
+				                                string("=") +
+				                                to_string(MatchLabelAndNumberOfBlock[(*intermediateBlockIter)->label] ) );
+
+				tmpDeque.push_front(b);
+				
+			}	
 			
-			while ( !tmpDeque.empty() ) {
-					
-					firstEppBlock = programFanuc.insert( firstEppBlock, tmpDeque.front() );
-					tmpDeque.pop_front();
-					
-			}
-			
-			firstEppBlock = FindFrontTypedBlock(TB_UNINIT_EPP);
 		}
 		
+		
+		while ( !tmpDeque.empty() ) {
+		
+			firstEppBlockIter = programFanuc.insert( firstEppBlockIter, tmpDeque.front() );
+			tmpDeque.pop_front();
+		
+		}
+		
+		firstEppBlockIter = FindFrontTypedBlock(TB_UNINIT_EPP);
+	}
+	
 }
 
 /* Substitue EPP block by three blocks:
    1) var with callback address,   2) GOTO block,   3) numbered block to return. */
-static void TranslateFirstEppBlock(int variableNumber, int blockNumberToGo) {
+static void TranslateFirstEppBlock(char *labelOne, char *labelTwo) {
+
+	int variableNumber = MatchLabelAndVariable[labelTwo];
+	int blockNumberToGo = MatchLabelAndNumberOfBlock[labelOne];
 	
 	auto firstEppBlock = FindFrontTypedBlock(TB_EPP);
 	(*firstEppBlock)->type = TB_UNINIT_EPP; //   uninitialized epp_block
 	
 	
-
 	int numberOfBlockAfterEpp = ++MaximalNumberOfBlock;
 	*(*firstEppBlock)->translatedBlock = "#" + to_string(variableNumber) + "=" + to_string(numberOfBlockAfterEpp);
 	
 	Block *b = new Block();				
-	b->translatedBlock = new string( string("GOTO ") + to_string(blockNumberToGo) );
+	b->indentation = (*firstEppBlock)->indentation;
+	b->translatedBlock = new string( string("GOTO ") +
+	                                 to_string(blockNumberToGo) +
+									 " (" + labelOne + " -> " + labelTwo + ")");
 	firstEppBlock = programFanuc.insert(firstEppBlock+1, b);
 	
-	b = new Block();				
+	b = new Block();
+	b->indentation = (*firstEppBlock)->indentation;
 	b->translatedBlock = new string( string("N") + to_string(numberOfBlockAfterEpp) );
-	programFanuc.insert(firstEppBlock+1, b);
+	programFanuc.insert(firstEppBlock + 1, b);
 	
 }
 
+
+/* New variable initialization block before 'labelOne':
+   initialize of callback variable by default address (corresponding to 'labelTwo')
+   for linear program execution. */
 static void InitializeEppBlocks() {
+
 	for (auto currentLabel = MatchLabels.begin(); currentLabel != MatchLabels.end(); currentLabel++ ) {
-		auto secondLabel = (*currentLabel).second;
-		while (MatchLabels.find(secondLabel) != MatchLabels.end() ) {
-			secondLabel = MatchLabels[secondLabel];
+		char *firstLabel = (*currentLabel).second;
+		while (MatchLabels.find(firstLabel) != MatchLabels.end() ) {
+			firstLabel = MatchLabels[firstLabel];
 		}
-		auto firstLabel = FindLabeledBlock(secondLabel);
 		
-		firstLabel--;
-		
-		Block* NBlock = new Block();				
-		NBlock->translatedBlock =  new string(string("#") +
-		                                      to_string(MatchLabelAndVariable[(*currentLabel).first]) +
+		auto firstLabelIter = FindLabeledBlock(firstLabel);
+		char *secondLabel = (*currentLabel).first;
+
+		Block* initBlock = new Block();				
+		initBlock->indentation = (*(firstLabelIter - 1))->indentation;
+		initBlock->translatedBlock =  new string(string("#") +
+		                                      to_string(MatchLabelAndVariable[secondLabel]) +
 											  string("=") 
-											  + to_string(MatchLabelAndNumberOfBlock[(*currentLabel).first]) );
+											  + to_string(MatchLabelAndNumberOfBlock[secondLabel]) );
 		
-		programFanuc.insert(firstLabel, NBlock);								  
+		programFanuc.insert(firstLabelIter - 1, initBlock);								  
 		
 	}	
 }
@@ -177,7 +194,8 @@ extern "C" int ProcessEppBlock() {
 
 	auto firstEpp = FindFrontTypedBlock(TB_EPP);
 	if (firstEpp == programFanuc.end()) {
-		/* There is no unprocessed EPPs in programFanuc */
+		/* There is no unprocessed EPPs in programFanuc. */
+
 		InitializeEppBlocks();
 		InitializeIntermediateLabels();
 		return 0;
@@ -186,54 +204,60 @@ extern "C" int ProcessEppBlock() {
 	Block* tmpCurBlock = *firstEpp;
 	EppBlock* curEppBlock = (EppBlock*)tmpCurBlock;
 
-	/* Check the highest label */
+	/* Check the highest label. */
 	SetMinimalBlockNumber(curEppBlock);
 
-
+	/* Insert block number before 'labelOne'. */
 	if ( MatchLabelAndNumberOfBlock.find(curEppBlock->labelOne) == MatchLabelAndNumberOfBlock.end() ) {
 
-		Block* NBlock = new Block();
-		NBlock->translatedBlock = new string(string("N") +
-		                                     to_string(++MaximalNumberOfBlock) +
-		                                     " (" + curEppBlock->labelOne + ")");
-		
 		auto firstLabelBlock = FindLabeledBlock(curEppBlock->labelOne);
+
+		Block* NBlock = new Block();
+		NBlock->indentation = (*firstLabelBlock)->indentation;
+		NBlock->translatedBlock = new string(string("N") +
+		                                     to_string(++MaximalNumberOfBlock) );
+		                                //   + " (" + curEppBlock->labelOne + ")");
+		
 		programFanuc.insert(firstLabelBlock, NBlock);
 		
 		MatchLabelAndNumberOfBlock[curEppBlock->labelOne] = MaximalNumberOfBlock;
 	}
 
-
+	/* Insert GOTO block before 'labelTwo'. */
 	if ( MatchLabelAndVariable.find(curEppBlock->labelTwo) == MatchLabelAndVariable.end() ) {
 		
-		Block* GotoBlock = new Block();				
-		int VariableForLabel = getUnusedFanucVariable();
-		GotoBlock->translatedBlock = new string(string("GOTO #") + to_string(VariableForLabel));
-		
 		auto secondLabelBlock = FindLabeledBlock(curEppBlock->labelTwo);
-		programFanuc.insert(secondLabelBlock, GotoBlock);
+
+		Block* gotoBlock = new Block();				
+		int VariableForLabel = getUnusedFanucVariable();
+		gotoBlock->indentation = (*secondLabelBlock)->indentation;
+		gotoBlock->translatedBlock = new string(string("GOTO #") + to_string(VariableForLabel));
+		
+		programFanuc.insert(secondLabelBlock, gotoBlock);
 		
 		MatchLabelAndVariable[curEppBlock->labelTwo] = VariableForLabel;
 	}
 
 
 	// add function for addition of number block
+	/* Insert block number before 'labelTwo' for possibility of linear execution. */
 	if ( MatchLabelAndNumberOfBlock.find(curEppBlock->labelTwo) == MatchLabelAndNumberOfBlock.end() ) {
-		
-		Block* NBlock = new Block();				
-		NBlock->translatedBlock =  new string(string("N") +
-		                                      to_string(++MaximalNumberOfBlock) +
-		                                      " (" + curEppBlock->labelTwo + ")");
-		
+
 		auto secondLabelBlock = FindLabeledBlock(curEppBlock->labelTwo);
+
+		Block* NBlock = new Block();				
+		NBlock->indentation = (*secondLabelBlock)->indentation;
+		NBlock->translatedBlock =  new string(string("N") +
+		                                      to_string(++MaximalNumberOfBlock) );
+		                                 //   + " (" + curEppBlock->labelTwo + ")");
+		
 		programFanuc.insert(secondLabelBlock, NBlock);
 		
 		MatchLabelAndNumberOfBlock[curEppBlock->labelTwo] = MaximalNumberOfBlock;
 	}
 	
-	TranslateFirstEppBlock(MatchLabelAndVariable[curEppBlock->labelTwo], MatchLabelAndNumberOfBlock[curEppBlock->labelOne]);
+	TranslateFirstEppBlock(curEppBlock->labelOne, curEppBlock->labelTwo);
 	
 	return 1;
 }
-
 

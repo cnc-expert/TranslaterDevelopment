@@ -1,9 +1,7 @@
-;Test 7: countur specific code processing.
+;Test 6: countur specific code processing.
 
 G0 G29 G40 G90 G79 Z0
 G95
-(UAO,2)
-(URT,0)
 ;FREZA D32
 T1.1 M16
 S1600 M3

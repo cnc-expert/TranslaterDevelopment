@@ -1,0 +1,46 @@
+;Test 10: Advanced RPT/URT/B?? testing.
+;  Nested RPT blocks. Labeled blocks have bodies.
+
+N10 (DIS, "SVERLENIE OTVERSTIY V CICLE")
+G0 G29 G40 G79 G95 Z0
+G90
+(UAO,2)
+(URT,0)
+;SVERLO D18
+T1.1 M16
+S1600 M3
+
+;----- Initial values -----
+;Initial angle
+E25=-90
+;Number of steps
+E0=5
+;Angle step
+E26=360/E0
+
+;----- Process -----
+
+E27=E25
+E40=0
+"NEXANG" (BGE,E40,E0,OUT)
+  (URT,E27)
+
+  X100 Y10
+  (RPT,3)
+    (RPT,10)
+      G83 R3 R50 Z-50 I5
+      G80
+      G91 X20
+    (ERP)
+    X-200 Y30
+  (ERP)
+  G90
+
+  E27=E27+E26
+  E40=E40+1
+(BNC, NEXANG)
+"OUT" (URT,)
+
+G79 Z0 M9
+G79 X0 Y0 M5
+M2

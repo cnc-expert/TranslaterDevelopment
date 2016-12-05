@@ -1,4 +1,4 @@
-;Countur specific code processing with EPP and zero-valued ISO codes
+;Test 7: contour specific code processing with EPP, UAO, URT and zero-valued ISO codes
 
 G0 G29 G40 G90 G79 Z
 G95

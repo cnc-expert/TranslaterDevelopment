@@ -17,7 +17,7 @@ all: bin/${OUTF}
 bin/${OUTF}: ${objects}
 	${CPP} -g $^ -o $@
 
-# All the C++ translation units building.
+# Build all the C++ translation units.
 bin/%.o: src/%.cpp
 	${CPP} ${CPPFLAGS} $^ -o $@
 
@@ -37,8 +37,8 @@ src/lex.yy.h  src/lex.yy.c: src/lexer.l src/parser.tab.h
 
 
 
-# Tests
-t1 t2 t3 t4 t5 t6 t7 t8 t9: bin/${OUTF}
+# Tests.
+t1 t2 t3 t4 t5 t6 t7 t8 t9 t10: bin/${OUTF}
 	bin/${OUTF} < tests/$@
 
 
