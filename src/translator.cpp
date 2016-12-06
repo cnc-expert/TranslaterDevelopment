@@ -394,7 +394,7 @@ extern "C" void* CreateURTBlock(char* value){
 	} else if (0 == atoi(value)) {
 		*blockObject->translatedBlock += "G69";
 	} else {
-		*blockObject->translatedBlock += "G68 X0 Y0 R#" + string(value);
+		*blockObject->translatedBlock += "G68 X0 Y0 R" + string(value);
 	}
 
 	deque<Block*> *programFanuc = new deque<Block*>();

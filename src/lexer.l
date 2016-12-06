@@ -265,6 +265,11 @@ ABS {
 	return ABS;
 }
 
+NEG {
+	yylval.tokenCodeMathFunc = NEG;
+	return NEG;
+}
+
 	/* The end of program - token */
 <<EOF>> { 
 	return PROG_EOF;

@@ -3,6 +3,6 @@
 (DIS, " some comment ")
 (DIS, "string with (parentheses)")
 
-;This should be ignored
+;Variables matching
 (DIS, E23)
 

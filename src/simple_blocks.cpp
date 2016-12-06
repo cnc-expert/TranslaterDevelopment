@@ -29,7 +29,7 @@ extern "C" void* TranslateFunctionWithTwoArguments(int function, void* firstExpr
 
 extern "C" void* TranslateFunction(int function,void* expression) {
 	
-	string* x = (string*)expression; // pointer to String*
+	string* x = (string*)expression;
 	
 	switch (function) {
 		case SIN:
@@ -51,10 +51,16 @@ extern "C" void* TranslateFunction(int function,void* expression) {
 			*x= "ATAN[" + *x + "]"; // ART(x) --> ATAN[x]
 			break;
 		case INT:
-			*x= "FIX[" + *x + "]"; // INT(x) --> FIX[x]
+			*x= "FIX[" + *x + "]";  // INT(x) --> FIX[x]
 			break;
 		case ABS:
 			*x= "ABS[" + *x + "]"; // ABS(x) --> ABS[x]
+			break;
+		case SQR:
+			*x= "SQRT[" + *x + "]"; // SQR(x) --> SQRT[x]
+			break;
+		case NEG:
+			*x= "-[" + *x + "]";    // NEG(x) --> -[x]
 			break;
 	}
 	

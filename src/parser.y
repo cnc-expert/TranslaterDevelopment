@@ -37,7 +37,7 @@
 %token<tokenSingleLetterFunc> G M T F S N R I J K b r
 %token<tokenAxis> X Y Z
 %token OPEQUAL OPDIV OPMULT OPPLUS OPMINUS OPARENT CPARENT
-%token<tokenCodeMathFunc> SIN COS TAN ARS ARC ART INT MOD SQR ABS
+%token<tokenCodeMathFunc> SIN COS TAN ARS ARC ART INT MOD SQR ABS NEG
 
 
 %%
@@ -87,8 +87,8 @@ numberd_block:
 ;
 
 core_block:
-	{ $$ = CreateDefinedDequeForBlockString(""); } /* for empty block */
-|	iso_block {$$ = CreateDequeForBlock($1); /*PrintCppString($1);*/}
+	/* Empty. */ { $$ = CreateDefinedDequeForBlockString(""); }
+|	iso_block {$$ = CreateDequeForBlock($1); }
 |	expr_block {$$ = CreateDequeForBlockString($1);}
 |	tlc_block
 ;
@@ -167,7 +167,7 @@ factor:
 
 
 func:
-	SIN | COS | TAN | ARS | ARC | ART | INT 
+	SIN | COS | TAN | ARS | ARC | ART | INT | SQR | NEG
 ;
 
 func2:

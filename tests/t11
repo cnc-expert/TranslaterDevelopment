@@ -1,0 +1,40 @@
+;Test 11: Axis mirror. G2 with I/J in absolute mode.
+
+N10 (DIS, "CONOUR MILLING")
+G0 G29 G40 G79 G95 Z0
+G90
+(UAO,2)
+(URT,0)
+;FREZA D20
+T1.1 M16
+S1900 M3
+
+X-25 Y-150
+E30=65
+"ZLEVEL"
+  Y-150
+  X-25
+  ZE30
+  G41 Y-120 F0.5
+  ;After translation should be: I25 J120
+  G2 G40 X-120 Y-25 I0 J0
+  G1 X-150 F2
+  G0 Z200
+  E30=E30-3
+(BGT,E30,30,ZLEVEL)
+"ZEND"
+
+(MIR,X)
+E30=65
+(EPP,ZLEVEL,ZEND)
+(MIR)
+
+(URT,180)
+E30=65
+(EPP,ZLEVEL,ZEND)
+(URT,)
+
+G79 Z M9
+G79 X Y M5
+M2
+

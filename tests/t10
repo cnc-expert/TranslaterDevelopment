@@ -1,4 +1,4 @@
-;Test 10: Advanced RPT/URT/B?? testing.
+;Test 10: Advanced RPT/URT/BNC/G83 testing.
 ;  Nested RPT blocks. Labeled blocks have bodies.
 
 N10 (DIS, "SVERLENIE OTVERSTIY V CICLE")
