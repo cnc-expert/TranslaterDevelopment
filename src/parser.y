@@ -25,7 +25,7 @@
 %type<cppString> factor signed_item item expr expr_first_item_with_sign expr_block 
 %type<list> core_block tlc_block tlc_body numberd_block confirm_block labld_block block indented_block
 %type<tokenCodeMathFunc> func func2 
-%type<numberOrVariable> var_or_num
+%type<numberOrVariable> var_or_num var_or_signed_num
 %type<tokenSingleLetterFunc> addr
 %type<tokenAxis> axis
 
@@ -187,7 +187,7 @@ tlc_body:
 		{ $$=CreateEPPBlock($3,$5);}
 |	UAO COMMA var_or_num
 		{ $$ = ChooseCoordinateSystem($3); }
-|	URT COMMA var_or_num
+|	URT COMMA var_or_signed_num
 		{ $$ = CreateURTBlock($3); }
 |	RPT COMMA var_or_num
 		{ $$ = CreateRPTDeque($3); }
@@ -207,18 +207,27 @@ tlc_body:
 		{$$ = CreateDefinedDequeForBlockString("G51.1 X0 Y0");} 
 |	BNC COMMA LABL
 		{ $$ = CreateBNCBlock($3); }
-|	BGT COMMA var_or_num COMMA var_or_num COMMA LABL
+|	BGT COMMA var_or_signed_num COMMA var_or_signed_num COMMA LABL
 		{ $$ = CreateJumpBlock("GT", $3, $5, $7); }
-|	BGE COMMA var_or_num COMMA var_or_num COMMA LABL
+|	BGE COMMA var_or_signed_num COMMA var_or_signed_num COMMA LABL
 		{ $$ = CreateJumpBlock("GE", $3, $5, $7); }
-|	BLT COMMA var_or_num COMMA var_or_num COMMA LABL
+|	BLT COMMA var_or_signed_num COMMA var_or_signed_num COMMA LABL
 		{ $$ = CreateJumpBlock("LT", $3, $5, $7); }
-|	BLE COMMA var_or_num COMMA var_or_num COMMA LABL
+|	BLE COMMA var_or_signed_num COMMA var_or_signed_num COMMA LABL
 		{ $$ = CreateJumpBlock("LE", $3, $5, $7); }
-|	BNE COMMA var_or_num COMMA var_or_num COMMA LABL
+|	BNE COMMA var_or_signed_num COMMA var_or_signed_num COMMA LABL
 		{ $$ = CreateJumpBlock("NE", $3, $5, $7); }
-|	BEQ COMMA var_or_num COMMA var_or_num COMMA LABL
+|	BEQ COMMA var_or_signed_num COMMA var_or_signed_num COMMA LABL
 		{ $$ = CreateJumpBlock("EQ", $3, $5, $7); }
+;
+
+
+var_or_signed_num:
+	var_or_num
+|	OPPLUS NUM
+		{ $$ = $2; }
+|	OPMINUS NUM
+		{ $$ = PreMinusCString($2); }
 ;
 
 var_or_num:

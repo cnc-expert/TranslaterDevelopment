@@ -1,5 +1,6 @@
 #include "translator.h"
 #include "parser.tab.h"
+#include "main.h"
 
 #include <iostream>
 #include <string>
@@ -7,6 +8,7 @@
 #include <set>
 #include <deque>
 #include <algorithm>
+#include <cstring>
 
 
 using namespace std;
@@ -121,5 +123,18 @@ extern "C" void PrintCppString(void* str) {
 	
 	string* x = (string*)str;
 	cout << *x << endl;
+}
+
+
+
+extern "C" char* PreMinusCString(char *s) {
+
+	char *signed_str = (char *) malloc(strlen(s));
+	signed_str[0] = '-';
+	strcpy(signed_str+1, s);
+
+	char *ret = AddToSymbolTable(signed_str); 
+	free(signed_str);
+	return ret;
 }
 

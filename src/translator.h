@@ -108,6 +108,7 @@ void* CreateEPPBlock(char* lableOne,char*  labelTwo);
 int  ProcessEppBlock();
 void* CreateDelayDeque(char* blockStr);
 void* CreateURTBlock(char* value);
+char* PreMinusCString(char *s);
 #ifdef __cplusplus
 }
 #endif
